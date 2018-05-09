@@ -21,6 +21,7 @@ namespace fizvlad {namespace vk_api {
     public:
 
         explicit ApiRequestExpetion(const char* message) : what_(message) {}
+        explicit ApiRequestExpetion(const std::string message) : what_(message.c_str()) {}
         ApiRequestExpetion(const ApiRequestExpetion &other) : what_(other.what_) {}
         ApiRequestExpetion &operator=(const ApiRequestExpetion &other) {
             what_ = other.what_;
