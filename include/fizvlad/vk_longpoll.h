@@ -3,6 +3,7 @@
 
 #include "vk_utility.h"
 
+
 namespace fizvlad {namespace vk_api {
 namespace longpoll {
 
