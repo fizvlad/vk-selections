@@ -7,7 +7,7 @@
 namespace fizvlad {namespace vk_api {
 namespace longpoll {
 
-    const Version VERSION = "3";
+    Version VERSION = "3";
 
     /// Pesudonym for unsigned. Used in flags for longpoll mode and events.
     typedef unsigned Flag;

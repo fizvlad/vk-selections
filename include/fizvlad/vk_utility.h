@@ -64,8 +64,8 @@ namespace fizvlad {namespace vk_api {
     /// Pseudonym for std::string type. Used for version in api requests.
     typedef std::string Version;
 
-    const Url VK_URL_PREFIX = "https://api.vk.com/method/";
-    const Version API_VERSION = "5.74";
+    Url VK_URL_PREFIX = "https://api.vk.com/method/";
+    Version API_VERSION = "5.74";
 
 
     /// Send HTTPS request for given method and return full response.
