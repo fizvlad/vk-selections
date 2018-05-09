@@ -1,9 +1,6 @@
 #ifndef VK_UTILITY_H_INCLUDED
 #define VK_UTILITY_H_INCLUDED
 
-#ifndef VK_API_UTILITY_H_INCLUDED
-#define VK_API_UTILITY_H_INCLUDED
-
 #include <string> // std::string
 #include <sstream> // std::stringstream
 #include <utility> // std::pair
@@ -92,7 +89,5 @@ namespace fizvlad {namespace vk_api {
     nlohmann::json execute(JScode code, Token token, Version version = API_VERSION);
 
 }}
-
-#endif // VK_API_UTILITY_H_INCLUDED
 
 #endif // VK_UTILITY_H_INCLUDED
