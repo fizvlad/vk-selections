@@ -32,6 +32,7 @@
 *.app
 
 # Codeblocks generated files and folders
+/build/
 /bin/
 /obj/
 *.cbp
