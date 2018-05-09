@@ -120,9 +120,9 @@ namespace fizvlad {namespace vk_api {
     nlohmann::json apiRequest(Method methodName, Parameters parameters, Token token, Version version) {
         nlohmann::json response = apiRequest_raw(methodName, parameters, token, version);
         if (response.find("response") != response.end()) {
-            return apiRequest_raw(methodName, parameters, token, version)["response"];
+            return response["response"];
         } else if (response.find("error") != response.end()) {
-            nlohmann::json e = apiRequest_raw(methodName, parameters, token, version)["error"];
+            nlohmann::json e = response["error"];
             std::cerr << "Error occured: \n" << e.dump();
             return e;
         } else {
