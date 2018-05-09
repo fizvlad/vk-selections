@@ -122,7 +122,9 @@ namespace fizvlad {namespace vk_api {
         if (response.find("response") != response.end()) {
             return apiRequest_raw(methodName, parameters, token, version)["response"];
         } else if (response.find("error") != response.end()) {
-            return apiRequest_raw(methodName, parameters, token, version)["error"];
+            nlohmann::json e = apiRequest_raw(methodName, parameters, token, version)["error"];
+            std::cerr << "Error occured: \n" << e.dump();
+            return e;
         } else {
             throw std::runtime_error("Unable to find re[\"response\"] or re[\"error\"]. \nResponse: " + response.dump());
         }

@@ -3,6 +3,7 @@
 
 #include <string> // std::string
 #include <sstream> // std::stringstream
+#include <iostream> // std::cerr
 #include <utility> // std::pair
 #include <unordered_map> // std::unordered_map
 #include <exception> // std::exception
