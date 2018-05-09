@@ -56,7 +56,7 @@ namespace fizvlad {namespace vk_api {
 
     /// Send HTTPS request for given url.
     /// Notice: Request is sent to page "${url}${to_string(parameters)}" so it is acceptable to provide string with already added parameters.
-    nlohmann::json jsonRequest(Url url, Parameters parameters);
+    nlohmann::json jsonRequest(Url url, Parameters parameters = {});
 
 
     /// Pseudonym for std::string type. Used for method name in api requests.
@@ -71,7 +71,7 @@ namespace fizvlad {namespace vk_api {
     typedef std::string Version;
 
     const Url VK_URL_PREFIX = "https://api.vk.com/method/";
-    const Version API_VERSION = "5.69";
+    const Version API_VERSION = "5.74";
 
 
     /// Send HTTPS request for given method and return full response.

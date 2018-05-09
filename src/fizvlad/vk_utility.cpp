@@ -98,7 +98,7 @@ namespace fizvlad {namespace vk_api {
     }
 
 
-    nlohmann::json jsonRequest(Url url, Parameters parameters = {}) {
+    nlohmann::json jsonRequest(Url url, Parameters parameters) {
         std::string responseString = safeRequest_(url + to_string(parameters));
         nlohmann::json response;
         try {
