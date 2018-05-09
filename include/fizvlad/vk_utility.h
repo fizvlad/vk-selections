@@ -64,16 +64,16 @@ namespace fizvlad {namespace vk_api {
     /// Pseudonym for std::string type. Used for version in api requests.
     typedef std::string Version;
 
-    Url VK_URL_PREFIX = "https://api.vk.com/method/";
-    Version API_VERSION = "5.74";
+    const Url VK_URL_PREFIX = "https://api.vk.com/method/";
+    const Version VERSION = "5.74";
 
 
     /// Send HTTPS request for given method and return full response.
-    nlohmann::json apiRequest_raw(Method methodName, Parameters parameters = {}, Token token = "", Version version = API_VERSION);
+    nlohmann::json apiRequest_raw(Method methodName, Parameters parameters = {}, Token token = "", Version version = VERSION);
 
 
     /// Send HTTPS request for given method and return response["response"].
-    nlohmann::json apiRequest(Method methodName, Parameters parameters = {}, Token token = "", Version version = API_VERSION);
+    nlohmann::json apiRequest(Method methodName, Parameters parameters = {}, Token token = "", Version version = VERSION);
 
 
     /// Pseudonym for std::string type. Used for code in execute request.
@@ -82,7 +82,7 @@ namespace fizvlad {namespace vk_api {
 
     /// Executes given JS code on VK server.
     /// Please take a look at https://vk.com/dev/execute before use.
-    nlohmann::json execute(JScode code, Token token, Version version = API_VERSION);
+    nlohmann::json execute(JScode code, Token token, Version version = VERSION);
 
 }}
 
