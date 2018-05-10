@@ -33,15 +33,15 @@ int main() {
     Selection test = Filyus_Bot.friends(token2);
     (!test).saveAs("Not_Filyus_friends");
 
-    /*
-    // Requires personal accessToken
-    Selection test2 = Fizvlad.subscribers(service_token);
-    test2.saveAs("test2");
-    */
-
     // Works fine. Requires much time
-    //Selection test3 = kinopoisk.members(token);
-    //test3.saveAs("Kinopoisk_subscribers");
+    Selection test2 = stepik.members(token);
+    test2.saveAs("stepik_members");
+
+    Selection test3 = habr.members(token);
+    test3.saveAs("habr_members");
+
+    // Must be at least me . _.
+    (test2 && test3).saveAs("habr_and_stepik_members");
 
     return 0;
 }
