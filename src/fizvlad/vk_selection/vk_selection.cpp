@@ -26,14 +26,77 @@ namespace fizvlad {namespace vk_selection {
 
 
     Selection Selection::operator&&(const Selection& other) const {
-        Selection result(*this);
-        result.intersect(other);
+        Selection result;
+        bool ifDifferentInvertation = isInverted_ != other.isInverted_;
+        if (ifDifferentInvertation) {
+            // Selections got different invertations.
+            // We will exclude some units from uninverted selection.
+            // Result is uninverted
+            bool ifThisInverted = isInverted_;
+            inFiles3_("rb", other, "rb", result, "ab", [ifThisInverted](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                exclusionToFile_(resultFile, ifThisInverted ? otherFile : thisFile, ifThisInverted ? thisFile : otherFile);
+            });
+        } else {
+            // Selections got same invertations.
+            if (isInverted_) {
+                // We will find merger.
+                result.invert();
+                // Result is inverted.
+                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                    std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                    std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                    mergerToFile_(resultFile, thisFile, otherFile);
+                });
+            } else {
+                // We will find intersection.
+                // Result is uninverted.
+                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                    std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                    std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                    intersectionToFile_(resultFile, thisFile, otherFile);
+                });
+            }
+        }
         return result;
     }
 
     Selection Selection::operator||(const Selection& other) const {
-        Selection result(*this);
-        result.join(other);
+        Selection result;
+        bool ifDifferentInvertation = isInverted_ != other.isInverted_;
+        if (ifDifferentInvertation) {
+            // Selections got different invertations.
+            // We will exclude some units from inverted selection.
+            result.invert();
+            // Result is inverted.
+            bool ifThisInverted = isInverted_;
+            inFiles3_("rb", other, "rb", result, "ab", [ifThisInverted](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                exclusionToFile_(resultFile, ifThisInverted ? thisFile : otherFile, ifThisInverted ? otherFile : thisFile);
+            });
+        } else {
+            // Selections got same invertations.
+            if (isInverted_) {
+                // We will find intersection.
+                result.invert();
+                // Result is inverted.
+                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                    std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                    std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                    intersectionToFile_(resultFile, thisFile, otherFile);
+                });
+            } else {
+                // We will find merger.
+                // Result is uninverted.
+                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                    std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                    std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
+                    mergerToFile_(resultFile, thisFile, otherFile);
+                });
+            }
+        }
         return result;
     }
 
@@ -45,11 +108,13 @@ namespace fizvlad {namespace vk_selection {
 
 
     void Selection::intersect(const Selection &other) {
-        // TODO &&
+        Selection result = *this && other;
+        swap(*this, result);
     }
 
     void Selection::join(const Selection &other) {
-        // TODO ||
+        Selection result = *this || other;
+        swap(*this, result);
     }
 
     void Selection::invert() {
@@ -125,6 +190,19 @@ namespace fizvlad {namespace vk_selection {
         if (std::remove(name_.c_str()) != 0) {
             std::cerr << "Error: Unable to remove " << name_ << " with size of ~" << (size_ * 5 / 1000) << "MB" << std::endl;
         }
+    }
+
+
+    void exclusionToFile_(std::FILE *target, std::FILE* in, std::FILE* ex) {
+        // TODO Exclusion
+    }
+
+    void mergerToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2) {
+        // TODO Merger
+    }
+
+    void intersectionToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2) {
+        // TODO Intersection
     }
 
 

@@ -100,6 +100,25 @@ namespace fizvlad {namespace vk_selection {
             std::fclose(file2);
         }
 
+
+        template <typename F>
+        void inFiles3_(const char* mode, const vk_selection::Selection &selection1, const char* mode1, const vk_selection::Selection &selection2, const char* mode2, F func) {
+            // TODO Correct work with function from template
+            std::FILE *file = std::fopen(name_.c_str(), mode);
+            std::FILE *file1 = std::fopen(selection1.name_.c_str(), mode1);
+            std::FILE *file2 = std::fopen(selection2.name_.c_str(), mode2);
+            func(file, file1, file2);
+            std::fclose(file);
+            std::fclose(file1);
+            std::fclose(file2);
+        }
+
+
+        void exclusionToFile_(std::FILE *target, std::FILE* in, std::FILE* ex);
+        void mergerToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2);
+        void intersectionToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2);
+
+
         void updateMeta_();
 
 
