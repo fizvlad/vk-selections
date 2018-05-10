@@ -27,21 +27,31 @@ int main() {
     Unit Filyus_Bot = Unit(283177744, true, token);
     Unit Fizvlad = Unit("id157230821", token);
     Unit buerak = Unit("buerak_spring", token);
-    cout << habr << endl << gag << endl << kinopoisk << endl << stepik << endl << Filyus_Bot << endl << Fizvlad << endl << buerak << endl;
+    Unit spbu_love = Unit("spbu_love", token);
+    Unit spbu_overhear = Unit("overhearspbsu", token);
+    cout << habr << endl
+         << gag << endl
+         << kinopoisk << endl
+         << stepik << endl
+         << Filyus_Bot << endl
+         << Fizvlad << endl
+         << buerak << endl
+         << spbu_love << endl
+         << spbu_overhear << endl;
 
     // Works fine
-    Selection test = Filyus_Bot.friends(token2);
-    (!test).saveAs("Not_Filyus_friends");
+    //Selection test = Filyus_Bot.friends(token2);
+    //(!test).saveAs("Not_Filyus_friends");
 
     // Works fine. Requires much time
-    Selection test2 = stepik.members(token);
-    test2.saveAs("stepik_members");
+    Selection test2 = spbu_love.members(token);
+    test2.saveAs("spbu1_members");
 
-    Selection test3 = habr.members(token);
-    test3.saveAs("habr_members");
+    Selection test3 = spbu_overhear.members(token);
+    test3.saveAs("spbu2_members");
 
     // Must be at least me . _.
-    (test2 && test3).saveAs("habr_and_stepik_members");
+    (test2 || test3).saveAs("spbu_members");
 
     return 0;
 }

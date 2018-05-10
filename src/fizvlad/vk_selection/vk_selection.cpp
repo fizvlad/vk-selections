@@ -12,18 +12,158 @@ namespace {
     }
 
 
-    // Notice: Files cursors must be in place. Parsing till the end of the file.
+    /// Struct to stor unit type and id. Will be used to sort units.
+    /// Only for use in anonumous namespace to interact with file.
+    struct util_Unit {
+        // Using char instead of UnitType. UnitType is enum:char though so it doesn't really matter.
+        char type;
+        fizvlad::vk_selection::UnitId id;
 
-    void exclusionToFile_(std::FILE *target, std::FILE* in, std::FILE* ex) {
-        // TODO Exclusion
+        util_Unit() : type(fizvlad::vk_selection::Undefined), id(0) {}
+
+        /// Creating by reading from selection file.
+        /// Returnes cursor back if pickOnly.
+        util_Unit(std::FILE *file, bool pickOnly = false) {
+            next(file, pickOnly);
+        }
+
+        /// Returnes thether have reached EOF.
+        bool next(std::FILE *file, bool pickOnly = false) {
+            std::fread(&type, sizeof(char), 1, file);
+            std::fread(&id, sizeof(fizvlad::vk_selection::UnitId), 1, file);
+            if (pickOnly) {
+                std::fseek(file, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
+            }
+            return std::feof(file) != 0;
+        }
+
+        /// Saves to unit to target file.
+        void saveTo(std::FILE *target) {
+            fwrite(&type, sizeof(type), 1, target);
+            fwrite(&id, sizeof(id), 1, target);
+        }
+    };
+
+    bool operator<(const util_Unit &l, const util_Unit &r) {
+        return l.type == r.type ? l.id < r.id : l.type < r.type;
+    }
+    bool operator==(const util_Unit &l, const util_Unit &r) {
+        return l.type == r.type && l.id == r.id && l.type == r.type;
+    }
+    bool operator>(const util_Unit &l, const util_Unit &r) {
+        return !(l < r || l == r);
+    }
+    bool operator!=(const util_Unit &l, const util_Unit &r) {
+        return !(l == r);
+    }
+    bool operator<=(const util_Unit &l, const util_Unit &r) {
+        return l < r || l == r;
+    }
+    bool operator>=(const util_Unit &l, const util_Unit &r) {
+        return l > r || l == r;
     }
 
-    void mergerToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2) {
-        // TODO Merger
+
+    // Notice: Files cursors must be in place.
+    // Notice: Parsing till the end of the file.
+    // Notice: Files should be sorted by ascending of Units.
+
+    void template_ToFile_(std::FILE *target, std::FILE *source1, std::FILE *source2,
+        bool save1_if_no2 = true,
+        bool save2_if_no1 = true,
+        bool save_if_equal = true,
+        bool save1_if_different = true,
+        bool save2_if_different = true
+    ) {
+        bool ifEOF1 = std::feof(source1) != 0;
+        bool ifEOF2 = std::feof(source2) != 0;
+        while (true) {
+            // If one of sources is now empty
+            util_Unit unit;
+            if (ifEOF1) {
+                while(!ifEOF2) {
+                    ifEOF2 = unit.next(source2);
+                    if (save1_if_no2) unit.saveTo(target);
+                }
+                return;
+            }
+            if (ifEOF2) {
+                while(!ifEOF1) {
+                    ifEOF1 = unit.next(source1);
+                    if (save2_if_no1) unit.saveTo(target);
+                }
+                return;
+            }
+
+
+            // While still have something in both sources
+
+            // Peeking single units to compare
+            util_Unit unit1(source1);
+            util_Unit unit2(source2);
+
+            if (unit1 == unit2) {
+
+                // Similar units
+                while (!ifEOF1 && !ifEOF2 && unit1 == unit2) {
+                    if (save_if_equal) unit1.saveTo(target);
+
+                    ifEOF1 = unit1.next(source1);
+                    ifEOF2 = unit2.next(source2);
+                }
+                if (unit1 != unit2) {
+                    // Falling back
+                    std::fseek(source1, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
+                    std::fseek(source2, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
+                } else {
+                    // Reached EOF. But unit1 == unit2 so we need to save it
+                    if (save_if_equal) unit1.saveTo(target);
+                }
+
+            } else if (unit1 < unit2) {
+
+                while (!ifEOF1 && unit1 < unit2) {
+                    if (save1_if_different) unit1.saveTo(target);
+                    ifEOF1 = unit1.next(source1);
+                }
+                if (unit1 >= unit2) {
+                    // Falling back
+                    std::fseek(source1, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
+                } else {
+                    // Reached EOF. But unit1 < unit2 so we need to save it
+                    if (save1_if_different) unit1.saveTo(target);
+                }
+
+            } else {
+
+                while (!ifEOF2 && unit2 < unit1) {
+                    if (save2_if_different) unit2.saveTo(target);
+                    ifEOF2 = unit2.next(source2);
+                }
+                if (unit2 >= unit1) {
+                    // Falling back
+                    std::fseek(source2, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
+                } else {
+                    // Reached EOF. But unit2 < unit1 so we need to save it
+                    if (save2_if_different) unit2.saveTo(target);
+                }
+
+            }
+        }
     }
 
-    void intersectionToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2) {
-        // TODO Intersection
+
+    // All elements from source1 but not from source2
+    void exclusionToFile_(std::FILE *target, std::FILE *source1, std::FILE *source2) {
+        template_ToFile_(target, source1, source2, true, false, false, true, false);
+    }
+
+    void mergerToFile_(std::FILE *target, std::FILE *source1, std::FILE *source2) {
+        template_ToFile_(target, source1, source2, true, true, true, true, true);
+    }
+
+    void intersectionToFile_(std::FILE *target, std::FILE *source1, std::FILE *source2) {
+        template_ToFile_(target, source1, source2, false, false, true, false, false);
     }
 }
 
@@ -47,7 +187,7 @@ namespace fizvlad {namespace vk_selection {
             // We will exclude some units from uninverted selection.
             // Result is uninverted
             bool ifThisInverted = isInverted_;
-            inFiles3_("rb", other, "rb", result, "ab", [ifThisInverted](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+            inFiles3_("rb", other, "rb", result, "ab", [ifThisInverted](std::FILE *thisFile, std::FILE *otherFile, std::FILE *resultFile){
                 std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                 std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                 exclusionToFile_(resultFile, ifThisInverted ? otherFile : thisFile, ifThisInverted ? thisFile : otherFile);
@@ -58,7 +198,7 @@ namespace fizvlad {namespace vk_selection {
                 // We will find merger.
                 result.invert();
                 // Result is inverted.
-                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE *thisFile, std::FILE *otherFile, std::FILE *resultFile){
                     std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                     std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                     mergerToFile_(resultFile, thisFile, otherFile);
@@ -66,7 +206,7 @@ namespace fizvlad {namespace vk_selection {
             } else {
                 // We will find intersection.
                 // Result is uninverted.
-                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE *thisFile, std::FILE *otherFile, std::FILE *resultFile){
                     std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                     std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                     intersectionToFile_(resultFile, thisFile, otherFile);
@@ -85,7 +225,7 @@ namespace fizvlad {namespace vk_selection {
             result.invert();
             // Result is inverted.
             bool ifThisInverted = isInverted_;
-            inFiles3_("rb", other, "rb", result, "ab", [ifThisInverted](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+            inFiles3_("rb", other, "rb", result, "ab", [ifThisInverted](std::FILE *thisFile, std::FILE *otherFile, std::FILE *resultFile){
                 std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                 std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                 exclusionToFile_(resultFile, ifThisInverted ? thisFile : otherFile, ifThisInverted ? otherFile : thisFile);
@@ -96,7 +236,7 @@ namespace fizvlad {namespace vk_selection {
                 // We will find intersection.
                 result.invert();
                 // Result is inverted.
-                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE *thisFile, std::FILE *otherFile, std::FILE *resultFile){
                     std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                     std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                     intersectionToFile_(resultFile, thisFile, otherFile);
@@ -104,7 +244,7 @@ namespace fizvlad {namespace vk_selection {
             } else {
                 // We will find merger.
                 // Result is uninverted.
-                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE* thisFile, std::FILE* otherFile, std::FILE* resultFile){
+                inFiles3_("rb", other, "rb", result, "ab", [](std::FILE *thisFile, std::FILE *otherFile, std::FILE *resultFile){
                     std::fseek(thisFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                     std::fseek(otherFile, sizeof(char) + sizeof(size_t), SEEK_SET);
                     mergerToFile_(resultFile, thisFile, otherFile);
@@ -179,7 +319,7 @@ namespace fizvlad {namespace vk_selection {
 
 
     Selection::Selection() : isInverted_(false), size_(0), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
-        inFile_("wb", [this](std::FILE* file){
+        inFile_("wb", [this](std::FILE *file){
             char c = isInverted_ ? '1' : '0';
             std::fwrite(&c, sizeof(char), 1, file);
             std::fwrite(&size_, sizeof(size_t), 1, file);
@@ -208,7 +348,7 @@ namespace fizvlad {namespace vk_selection {
 
 
     void Selection::updateMeta_() {
-        inFile_("ab", [this](std::FILE* file){
+        inFile_("ab", [this](std::FILE *file){
             std::fseek(file, 0, SEEK_SET); // Moving to the beginning of file
             char c = isInverted_ ? '1' : '0';
             std::fwrite(&c, sizeof(char), 1, file);
