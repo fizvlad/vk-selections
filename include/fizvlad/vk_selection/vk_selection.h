@@ -26,6 +26,7 @@ namespace fizvlad {namespace vk_selection {
     public:
 
         Selection&operator=(const Selection&) = delete;
+        Selection(const Selection&) = delete;
 
         Selection&operator=(Selection&&) = default;
         Selection(Selection&&) = default;
@@ -33,13 +34,13 @@ namespace fizvlad {namespace vk_selection {
         ~Selection();
 
 
-        Selection operator&&(const Selection &other) const;
-        Selection operator||(const Selection &other) const;
-        Selection operator!() const;
+        Selection operator&&(Selection &other);
+        Selection operator||(Selection &other);
+        Selection operator!();
 
 
-        void intersect(const Selection &other);
-        void join(const Selection &other);
+        void intersect(Selection &other);
+        void join(Selection &other);
         void invert();
 
 
@@ -75,7 +76,7 @@ namespace fizvlad {namespace vk_selection {
 
         Selection();
 
-        Selection(const Selection& other);
+        Selection(Selection& other);
 
 
         void removeFile_();
@@ -91,7 +92,7 @@ namespace fizvlad {namespace vk_selection {
 
 
         template <typename F>
-        static void inFiles2_(const vk_selection::Selection &selection1, const char* mode1, const vk_selection::Selection &selection2, const char* mode2, F func) {
+        static void inFiles2_(vk_selection::Selection &selection1, const char* mode1, vk_selection::Selection &selection2, const char* mode2, F func) {
             // TODO Correct work with function from template
             std::FILE *file1 = std::fopen(selection1.name_.c_str(), mode1);
             std::FILE *file2 = std::fopen(selection2.name_.c_str(), mode2);
@@ -102,7 +103,7 @@ namespace fizvlad {namespace vk_selection {
 
 
         template <typename F>
-        void inFiles3_(const char* mode, const vk_selection::Selection &selection1, const char* mode1, const vk_selection::Selection &selection2, const char* mode2, F func) {
+        void inFiles3_(const char* mode, vk_selection::Selection &selection1, const char* mode1, vk_selection::Selection &selection2, const char* mode2, F func) {
             // TODO Correct work with function from template
             std::FILE *file = std::fopen(name_.c_str(), mode);
             std::FILE *file1 = std::fopen(selection1.name_.c_str(), mode1);
@@ -112,12 +113,6 @@ namespace fizvlad {namespace vk_selection {
             std::fclose(file1);
             std::fclose(file2);
         }
-
-
-        void exclusionToFile_(std::FILE *target, std::FILE* in, std::FILE* ex);
-        void mergerToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2);
-        void intersectionToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2);
-
 
         void updateMeta_();
 

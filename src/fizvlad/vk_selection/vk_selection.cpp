@@ -11,6 +11,20 @@ namespace {
         return "var id=" + std::to_string(id) + ";var count=1000;var offset=" + std::to_string(offset) + ";var requestsLimit=25;var result=[];var first=API.groups.getMembers({\"group_id\":id,\"count\":count,\"offset\":offset});result.push(first.items);var total=first.count;var current=first.items.length;var i=1;while (i*count<total&&i<requestsLimit){var r=API.groups.getMembers({\"group_id\":id,\"count\":count,\"offset\":offset+i*count});result.push(r.items);current=current+r.items.length;i=i+1;}return {\"total\":total,\"current\":current,\"items\":result};";
     }
 
+
+    // Notice: Files cursors must be in place. Parsing till the end of the file.
+
+    void exclusionToFile_(std::FILE *target, std::FILE* in, std::FILE* ex) {
+        // TODO Exclusion
+    }
+
+    void mergerToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2) {
+        // TODO Merger
+    }
+
+    void intersectionToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2) {
+        // TODO Intersection
+    }
 }
 
 
@@ -25,7 +39,7 @@ namespace fizvlad {namespace vk_selection {
     }
 
 
-    Selection Selection::operator&&(const Selection& other) const {
+    Selection Selection::operator&&(Selection& other) {
         Selection result;
         bool ifDifferentInvertation = isInverted_ != other.isInverted_;
         if (ifDifferentInvertation) {
@@ -62,7 +76,7 @@ namespace fizvlad {namespace vk_selection {
         return result;
     }
 
-    Selection Selection::operator||(const Selection& other) const {
+    Selection Selection::operator||(Selection& other) {
         Selection result;
         bool ifDifferentInvertation = isInverted_ != other.isInverted_;
         if (ifDifferentInvertation) {
@@ -100,19 +114,19 @@ namespace fizvlad {namespace vk_selection {
         return result;
     }
 
-    Selection Selection::operator!() const {
+    Selection Selection::operator!() {
         Selection result(*this);
         result.invert();
         return result;
     }
 
 
-    void Selection::intersect(const Selection &other) {
+    void Selection::intersect(Selection &other) {
         Selection result = *this && other;
         swap(*this, result);
     }
 
-    void Selection::join(const Selection &other) {
+    void Selection::join(Selection &other) {
         Selection result = *this || other;
         swap(*this, result);
     }
@@ -173,7 +187,7 @@ namespace fizvlad {namespace vk_selection {
     }
 
 
-    Selection::Selection(const Selection& other)  : isInverted_(other.isInverted_), size_(other.size_), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
+    Selection::Selection(Selection& other)  : isInverted_(other.isInverted_), size_(other.size_), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
         inFiles2_(other, "rb", *this, "wb", [](std::FILE *source, std::FILE *target){
             size_t B_SIZE = 256;
             char buffer[B_SIZE];
@@ -190,19 +204,6 @@ namespace fizvlad {namespace vk_selection {
         if (std::remove(name_.c_str()) != 0) {
             std::cerr << "Error: Unable to remove " << name_ << " with size of ~" << (size_ * 5 / 1000) << "MB" << std::endl;
         }
-    }
-
-
-    void exclusionToFile_(std::FILE *target, std::FILE* in, std::FILE* ex) {
-        // TODO Exclusion
-    }
-
-    void mergerToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2) {
-        // TODO Merger
-    }
-
-    void intersectionToFile_(std::FILE *target, std::FILE* source1, std::FILE* source2) {
-        // TODO Intersection
     }
 
 
