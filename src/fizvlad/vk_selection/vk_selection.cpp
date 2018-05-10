@@ -17,26 +17,28 @@ namespace {
 namespace fizvlad {namespace vk_selection {
 
     Selection::~Selection() {
-        if (std::remove(name_.c_str()) != 0) {
-            std::cerr << "Error: Unable to remove " << name_ << " with size of ~" << (size_ * 5 / 1000) << "MB" << std::endl;
+        bool autoremove = true;
+        if (autoremove) {
+            removeFile_();
         }
+
     }
 
 
     Selection Selection::operator&&(const Selection& other) const {
-        Selection result(*this, name_ + "_AND");
+        Selection result(*this);
         result.intersect(other);
         return result;
     }
 
     Selection Selection::operator||(const Selection& other) const {
-        Selection result(*this, name_ + "_OR");
+        Selection result(*this);
         result.join(other);
         return result;
     }
 
     Selection Selection::operator!() const {
-        Selection result(*this, name_ + "_NOT");
+        Selection result(*this);
         result.invert();
         return result;
     }
@@ -94,7 +96,10 @@ namespace fizvlad {namespace vk_selection {
     }
 
 
-    Selection::Selection(Filename name) : isInverted_(false), size_(0), name_(name + "." + FILE_EXTENSION) {
+    size_t Selection::tIndex_ = 0;
+
+
+    Selection::Selection() : isInverted_(false), size_(0), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
         inFile_("wb", [this](std::FILE* file){
             char c = isInverted_ ? '1' : '0';
             std::fwrite(&c, sizeof(char), 1, file);
@@ -103,7 +108,7 @@ namespace fizvlad {namespace vk_selection {
     }
 
 
-    Selection::Selection(const Selection& other, Filename name)  : isInverted_(other.isInverted_), size_(other.size_), name_(name + "." + FILE_EXTENSION) {
+    Selection::Selection(const Selection& other)  : isInverted_(other.isInverted_), size_(other.size_), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
         inFiles2_(other, "rb", *this, "wb", [](std::FILE *source, std::FILE *target){
             size_t B_SIZE = 256;
             char buffer[B_SIZE];
@@ -116,6 +121,13 @@ namespace fizvlad {namespace vk_selection {
     }
 
 
+    void Selection::removeFile_() {
+        if (std::remove(name_.c_str()) != 0) {
+            std::cerr << "Error: Unable to remove " << name_ << " with size of ~" << (size_ * 5 / 1000) << "MB" << std::endl;
+        }
+    }
+
+
     void Selection::updateMeta_() {
         inFile_("ab", [this](std::FILE* file){
             std::fseek(file, 0, SEEK_SET); // Moving to the beginning of file
@@ -123,6 +135,29 @@ namespace fizvlad {namespace vk_selection {
             std::fwrite(&c, sizeof(char), 1, file);
             std::fwrite(&size_, sizeof(size_t), 1, file);
         });
+    }
+
+
+
+
+
+
+
+
+
+
+    void swap(Selection &l, Selection &r) {
+        bool i = l.isInverted_;
+        size_t s = l.size_;
+        Selection::Filename n = l.name_;
+
+        l.isInverted_ = r.isInverted_;
+        l.size_ = r.size_;
+        l.name_ = r.name_;
+
+        r.isInverted_ = i;
+        r.size_ = s;
+        r.name_ = n;
     }
 
 
@@ -183,7 +218,7 @@ namespace fizvlad {namespace vk_selection {
         };
         nlohmann::json response = vk_api::apiRequest("friends.get", parameters, token)["items"];
 
-        Selection result(customId_ + "_friends");
+        Selection result;
         result.inFile_("ab", [response](FILE *file){
             char pre = (char) User; // Forced to first create char pre because there is no way to save enum element into file
             for (UnitId id : response) {
@@ -223,7 +258,7 @@ namespace fizvlad {namespace vk_selection {
             }
         }
 
-        Selection result(customId_ + "_members");
+        Selection result;
 
         result.inFile_("ab", [units](FILE *file){
             char pre = (char) User; // Forced to first create char pre because there is no way to save enum element into file

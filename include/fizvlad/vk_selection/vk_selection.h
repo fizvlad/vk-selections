@@ -25,9 +25,7 @@ namespace fizvlad {namespace vk_selection {
     class Selection {
     public:
 
-        Selection() = delete;
         Selection&operator=(const Selection&) = delete;
-        Selection(const Selection&) = delete;
 
         Selection&operator=(Selection&&) = default;
         Selection(Selection&&) = default;
@@ -65,14 +63,22 @@ namespace fizvlad {namespace vk_selection {
 
         friend class Unit;
 
+        /// Static variables which is incremented on every creation of Selection.
+        /// Used to create files with unique names.
+        static size_t tIndex_;
+
+
         bool     isInverted_;
         size_t   size_;
         Filename name_;
 
 
-        Selection(Filename name);
+        Selection();
 
-        Selection(const Selection& other, Filename name);
+        Selection(const Selection& other);
+
+
+        void removeFile_();
 
 
         template <typename F>
@@ -95,7 +101,12 @@ namespace fizvlad {namespace vk_selection {
         }
 
         void updateMeta_();
+
+
+        friend void swap(Selection &l, Selection &r);
     };
+
+    void swap(Selection &l, Selection &r);
 
 
     /// Class to work with single User, Group, Public or Event.
