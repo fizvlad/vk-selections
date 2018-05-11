@@ -34,8 +34,8 @@ namespace fizvlad {namespace vk_selection {
         ~Selection();
 
 
-        Selection operator&&(Selection &other);
-        Selection operator||(Selection &other);
+        Selection operator&(Selection &other);
+        Selection operator|(Selection &other);
         Selection operator!();
 
 
