@@ -206,6 +206,22 @@ namespace {
 
 namespace fizvlad {namespace vk_selection {
 
+    std::string unitTypeName(UnitType type) {
+        return unitTypeNames[(int)type - (int)Undefined];
+    }
+
+
+
+
+    Selection &Selection::operator=(Selection &&other) {
+        swap(other, *this);
+        return *this;
+    }
+    Selection::Selection(Selection &&other) {
+        swap(other, *this);
+    }
+
+
     Selection::~Selection() {
         bool autoremove = true;
         if (autoremove) {
@@ -215,7 +231,7 @@ namespace fizvlad {namespace vk_selection {
     }
 
 
-    Selection Selection::operator&(Selection& other) {
+    Selection Selection::operator&&(const Selection& other) const {
         Selection result;
         size_t sizeTemp; // Using this variable instead of this->size_
         bool ifDifferentInvertation = isInverted_ != other.isInverted_;
@@ -254,7 +270,7 @@ namespace fizvlad {namespace vk_selection {
         return result;
     }
 
-    Selection Selection::operator|(Selection& other) {
+    Selection Selection::operator||(const Selection& other) const {
         Selection result;
         size_t sizeTemp; // Using this variable instead of this->size_
         bool ifDifferentInvertation = isInverted_ != other.isInverted_;
@@ -294,7 +310,7 @@ namespace fizvlad {namespace vk_selection {
         return result;
     }
 
-    Selection Selection::operator!() {
+    Selection Selection::operator!() const {
         Selection result(*this);
         result.invert();
         return result;
@@ -302,12 +318,12 @@ namespace fizvlad {namespace vk_selection {
 
 
     void Selection::intersect(Selection &other) {
-        Selection result = *this & other;
+        Selection result = *this && other;
         swap(*this, result);
     }
 
     void Selection::join(Selection &other) {
-        Selection result = *this | other;
+        Selection result = *this || other;
         swap(*this, result);
     }
 
@@ -367,7 +383,7 @@ namespace fizvlad {namespace vk_selection {
     }
 
 
-    Selection::Selection(Selection& other)  : isInverted_(other.isInverted_), size_(other.size_), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
+    Selection::Selection(const Selection& other)  : isInverted_(other.isInverted_), size_(other.size_), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
         inFiles2_(other, "rb", *this, "wb", [](std::FILE *source, std::FILE *target){
             size_t B_SIZE = 256;
             char buffer[B_SIZE];
@@ -377,6 +393,13 @@ namespace fizvlad {namespace vk_selection {
                 s = std::fread(buffer, sizeof(char), B_SIZE, source);
             }
         });
+    }
+
+
+    Selection &Selection::operator=(const Selection& other) {
+        Selection temp(other);
+        swap(temp, *this);
+        return *this;
     }
 
 
@@ -509,6 +532,10 @@ namespace fizvlad {namespace vk_selection {
         while (current < total) {
             // NOTICE Result of following command is array of arrays (due to API.execute restrictions)
             nlohmann::json response = vk_api::execute(js_groupMembers(id_, current), token);
+            if (response["total"] == nullptr) {
+                std::cerr << "Unable to get members of private group with id " << id_ << ". Custom id: " << customId_ << std:: endl;
+                break;
+            }
             total = (size_t) response["total"];
             if (current == 0) {
                 // On first call should reserve memory to prevent lot of reallocations
@@ -536,6 +563,9 @@ namespace fizvlad {namespace vk_selection {
         result.updateMeta_();
         return result;
     }
+
+
+    Unit::Unit(UnitType type, UnitId id, UnitCustomId customId) : type_(type), id_(id), customId_(customId) {}
 
 
     void Unit::initUser_(UnitId id, vk_api::Token token) {

@@ -18,6 +18,7 @@ namespace fizvlad {namespace vk_selection {
     enum UnitType : char {Undefined = '0', User, Public, Group, Event};
     /// Unit types.
     const std::vector<std::string> unitTypeNames = {"Undefined", "User", "Public", "Group", "Event"};
+    std::string unitTypeName(UnitType type);
 
 
     /// Class to work with selection of Units.
@@ -25,18 +26,15 @@ namespace fizvlad {namespace vk_selection {
     class Selection {
     public:
 
-        Selection&operator=(const Selection&) = delete;
-        Selection(const Selection&) = delete;
-
-        Selection&operator=(Selection&&) = default;
-        Selection(Selection&&) = default;
+        Selection&operator=(Selection &&other);
+        Selection(Selection &&other);
 
         ~Selection();
 
 
-        Selection operator&(Selection &other);
-        Selection operator|(Selection &other);
-        Selection operator!();
+        Selection operator&&(const Selection &other) const;
+        Selection operator||(const Selection &other) const;
+        Selection operator!() const;
 
 
         void intersect(Selection &other);
@@ -60,6 +58,22 @@ namespace fizvlad {namespace vk_selection {
         void saveAs(Filename name) const;
 
 
+        /// Apply function to each unit in selection
+        template <typename F>
+        void forEach(F func) {
+            // TODO Correct work with function from template
+            std::FILE *file = std::fopen(name_.c_str(), "rb");
+            std::fseek(file, sizeof(char) + sizeof(size_t), SEEK_SET);
+            for (size_t i = 0; i < size_; i++) {
+                UnitType type = (UnitType) std::fgetc(file);
+                UnitId id;
+                std::fread(&id, sizeof(id), 1, file);
+                func(type, id);
+            }
+            std::fclose(file);
+        }
+
+
     private:
 
         friend class Unit;
@@ -76,7 +90,8 @@ namespace fizvlad {namespace vk_selection {
 
         Selection();
 
-        Selection(Selection& other);
+        Selection(const Selection& other);
+        Selection&operator=(const Selection& other);
 
 
         void removeFile_();
@@ -92,7 +107,7 @@ namespace fizvlad {namespace vk_selection {
 
 
         template <typename F>
-        static void inFiles2_(vk_selection::Selection &selection1, const char* mode1, vk_selection::Selection &selection2, const char* mode2, F func) {
+        static void inFiles2_(const vk_selection::Selection &selection1, const char* mode1, const vk_selection::Selection &selection2, const char* mode2, F func) {
             // TODO Correct work with function from template
             std::FILE *file1 = std::fopen(selection1.name_.c_str(), mode1);
             std::FILE *file2 = std::fopen(selection2.name_.c_str(), mode2);
@@ -103,7 +118,7 @@ namespace fizvlad {namespace vk_selection {
 
 
         template <typename F>
-        void inFiles3_(const char* mode, vk_selection::Selection &selection1, const char* mode1, vk_selection::Selection &selection2, const char* mode2, F func) {
+        void inFiles3_(const char* mode, const vk_selection::Selection &selection1, const char* mode1, const vk_selection::Selection &selection2, const char* mode2, F func) const {
             // TODO Correct work with function from template
             std::FILE *file = std::fopen(name_.c_str(), mode);
             std::FILE *file1 = std::fopen(selection1.name_.c_str(), mode1);
@@ -113,6 +128,7 @@ namespace fizvlad {namespace vk_selection {
             std::fclose(file1);
             std::fclose(file2);
         }
+
 
         void updateMeta_();
 
@@ -134,8 +150,6 @@ namespace fizvlad {namespace vk_selection {
         /// Automatically identifies Unit type.
         Unit(UnitCustomId id, vk_api::Token token);
 
-
-        Unit() = delete;
 
         Unit &operator=(const Unit&) = default;
         Unit(const Unit&) = default;
@@ -171,9 +185,13 @@ namespace fizvlad {namespace vk_selection {
 
     private:
 
+        friend class Selection;
+
         UnitType type_;
         UnitId id_;
         UnitCustomId customId_;
+
+        Unit(UnitType type = Undefined, UnitId id = 0, UnitCustomId customId = "");
 
 
         void initUser_(UnitId id, vk_api::Token token);
