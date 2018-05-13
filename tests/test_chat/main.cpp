@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "vk_chat.h"
+#include "fizvlad/vk_api/vk_chat.h"
 
 using namespace std;
 using nlohmann::json;

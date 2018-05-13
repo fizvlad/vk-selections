@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "vk_longpoll.h"
+#include "fizvlad/vk_api/vk_longpoll.h"
 
 using namespace std;
 using nlohmann::json;

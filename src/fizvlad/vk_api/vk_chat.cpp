@@ -1,4 +1,4 @@
-#include "vk_chat.h"
+#include "fizvlad/vk_api/vk_chat.h"
 
 // Utility namespace. Unreachable from other files.
 namespace {

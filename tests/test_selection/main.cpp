@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "vk_selection.h"
+#include "fizvlad/vk_selection/vk_selection.h"
 
 using namespace std;
 using nlohmann::json;

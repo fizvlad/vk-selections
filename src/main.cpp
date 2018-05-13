@@ -1,9 +1,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "vk_chat.h"
-#include "vk_selection.h"
-#include "cpp-formula.h"
+#include "fizvlad/vk_api/vk_chat.h"
+#include "fizvlad/vk_selection/vk_selection.h"
+#include "fizvlad/cpp-formula/cpp-formula.h"
 
 using namespace std;
 using nlohmann::json;

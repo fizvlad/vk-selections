@@ -1,4 +1,4 @@
-#include "vk_utility.h"
+#include "fizvlad/vk_api/vk_utility.h"
 
 // Utility namespace. Unreachable from other files.
 namespace {

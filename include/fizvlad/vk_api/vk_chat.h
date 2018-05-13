@@ -3,7 +3,7 @@
 
 #include <vector> // std::vector
 
-#include "vk_longpoll.h"
+#include "fizvlad/vk_api/vk_longpoll.h"
 
 
 namespace fizvlad {namespace vk_api {

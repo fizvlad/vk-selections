@@ -1,7 +1,7 @@
 #ifndef VK_SELECTION_H_INCLUDED
 #define VK_SELECTION_H_INCLUDED
 
-#include "vk_utility.h"
+#include "fizvlad/vk_api/vk_utility.h"
 
 
 namespace fizvlad {namespace vk_selection {
