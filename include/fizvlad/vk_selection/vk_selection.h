@@ -138,6 +138,9 @@ namespace fizvlad {namespace vk_selection {
 
     void swap(Selection &l, Selection &r);
 
+    /// Print Selection info.
+    std::ostream &operator<<(std::ostream &os, const Selection &selection);
+
 
     /// Class to work with single User, Group, Public or Event.
     class Unit {

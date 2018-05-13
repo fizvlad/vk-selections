@@ -27,13 +27,15 @@ namespace {
             fromFile(file, pickOnly);
         }
 
-        /// Returnes whether have reached EOF.
+        /// Returnes whether have read correctly.
         bool fromFile(std::FILE *file, bool pickOnly = false) {
             if (std::feof(file) != 0) {
-                throw std::runtime_error("End of file reached");
+                throw std::runtime_error("End of file have already been reached");
             }
+
             std::fread(&type, sizeof(char), 1, file);
             std::fread(&id, sizeof(fizvlad::vk_selection::UnitId), 1, file);
+
             if (pickOnly) {
                 std::fseek(file, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
             }
@@ -79,111 +81,66 @@ namespace {
         bool save2_if_different = true
     ) {
         size_t savedAmount = 0;
-        bool ifEOF1 = std::feof(source1) != 0;
-        bool ifEOF2 = std::feof(source2) != 0;
 
-        while (true) {
-            // If one of sources is now empty
-            util_Unit unit;
-            if (ifEOF1) {
-                ifEOF2 = unit.fromFile(source2);
-                while(!ifEOF2) {
-                    if (save2_if_no1) {
-                        unit.toFile(target);
-                        savedAmount++;
-                    }
-                    ifEOF2 = unit.fromFile(source2);
+        util_Unit unit1(source1);
+        util_Unit unit2(source2);
+
+        bool ifCorrect1 = std::feof(source1) != 0;
+        bool ifCorrect2 = std::feof(source2) != 0;
+
+        while (!(ifCorrect1 && ifCorrect2)) {
+            // Have read unit1 and unit2 already
+
+            // One of files have ended and one of units is undefined:
+            if (ifCorrect1) {
+                // 1st file ended
+                if (save2_if_no1) {
+                    unit2.toFile(target);
+                    savedAmount++;
                 }
-                break;
+                ifCorrect2 = unit2.fromFile(source2);
+                continue;
             }
-            if (ifEOF2) {
-                ifEOF1 = unit.fromFile(source1);
-                while(!ifEOF1) {
-                    if (save1_if_no2) {
-                        unit.toFile(target);
-                        savedAmount++;
-                    }
-                    ifEOF1 = unit.fromFile(source1);
+            if (ifCorrect2) {
+                // 2nd file ended
+                if (save1_if_no2) {
+                    unit1.toFile(target);
+                    savedAmount++;
                 }
-                break;
+                ifCorrect1 = unit1.fromFile(source1);
+                continue;
             }
 
-
-            // While still have something in both sources
-
-            // Peeking single units to compare
-            util_Unit unit1(source1);
-            util_Unit unit2(source2);
-
+            // Otherwise both of units are correct
             if (unit1 == unit2) {
-
-                // Similar units
-                while (!ifEOF1 && !ifEOF2 && unit1 == unit2) {
-                    if (save_if_equal) {
-                        unit1.toFile(target);
-                        savedAmount++;
-                    }
-
-                    ifEOF1 = unit1.fromFile(source1);
-                    ifEOF2 = unit2.fromFile(source2);
+                if (save_if_equal) {
+                    unit1.toFile(target);
+                    // Equally to unit2.toFile(target);
+                    savedAmount++;
                 }
-                if (unit1 != unit2) {
-                    // Falling back
-                    std::fseek(source1, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
-                    std::fseek(source2, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
-                } else {
-                    // Reached EOF. But unit1 == unit2 so we can save it
-                    if (save_if_equal) {
-                        unit1.toFile(target);
-                        savedAmount++;
-                    }
+                ifCorrect1 = unit1.fromFile(source1);
+                ifCorrect2 = unit2.fromFile(source2);
+                continue;
+            }
+            if (unit1 < unit2) {
+                if (save1_if_different) {
+                    unit1.toFile(target);
+                    savedAmount++;
                 }
-
-            } else if (unit1 < unit2) {
-
-                while (!ifEOF1 && unit1 < unit2) {
-                    if (save1_if_different) {
-                        unit1.toFile(target);
-                        savedAmount++;
-                    }
-                    ifEOF1 = unit1.fromFile(source1);
+                ifCorrect1 = unit1.fromFile(source1);
+                continue;
+            }
+            if (unit1 > unit2) {
+                if (save2_if_different) {
+                    unit2.toFile(target);
+                    savedAmount++;
                 }
-                if (unit1 >= unit2) {
-                    // Falling back
-                    std::fseek(source1, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
-                    std::fseek(source2, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
-                } else {
-                    // Reached EOF. But unit1 < unit2 so we can save it
-                    if (save1_if_different) {
-                        unit1.toFile(target);
-                        savedAmount++;
-                    }
-                }
-
-            } else {
-
-                while (!ifEOF2 && unit2 < unit1) {
-                    if (save2_if_different) {
-                        unit2.toFile(target);
-                        savedAmount++;
-                    }
-                    ifEOF2 = unit2.fromFile(source2);
-                }
-                if (unit2 >= unit1) {
-                    // Falling back
-                    std::fseek(source1, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
-                    std::fseek(source2, -(sizeof(char) + sizeof(fizvlad::vk_selection::UnitId)), SEEK_CUR);
-                } else {
-                    // Reached EOF. But unit2 < unit1 so we can save it
-                    if (save2_if_different) {
-                        unit2.toFile(target);
-                        savedAmount++;
-                    }
-                }
-
+                ifCorrect2 = unit2.fromFile(source2);
+                continue;
             }
         }
 
+        // Now both files are read
         return savedAmount;
     }
 
@@ -425,6 +382,10 @@ namespace fizvlad {namespace vk_selection {
 
 
 
+
+    std::ostream &operator<<(std::ostream &os, const Selection &selection) {
+        os << "Inverted: " << (selection.isInverted() ? "true" : "false") << ". " << "Size: " << selection.size() << ".";
+    }
 
 
     void swap(Selection &l, Selection &r) {
