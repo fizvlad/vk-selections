@@ -88,7 +88,7 @@ namespace {
             if (ifEOF1) {
                 ifEOF2 = unit.fromFile(source2);
                 while(!ifEOF2) {
-                    if (save1_if_no2) {
+                    if (save2_if_no1) {
                         unit.toFile(target);
                         savedAmount++;
                     }
@@ -99,7 +99,7 @@ namespace {
             if (ifEOF2) {
                 ifEOF1 = unit.fromFile(source1);
                 while(!ifEOF1) {
-                    if (save2_if_no1) {
+                    if (save1_if_no2) {
                         unit.toFile(target);
                         savedAmount++;
                     }
