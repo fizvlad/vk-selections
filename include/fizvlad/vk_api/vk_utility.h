@@ -9,7 +9,7 @@
 #include <exception> // std::exception
 
 #include "curl.h" // curl
-#include "json.hpp" // json
+#include "nlohmann/json.hpp" // json
 
 
 namespace fizvlad {namespace vk_api {
