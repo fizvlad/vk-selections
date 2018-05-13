@@ -88,7 +88,6 @@ namespace {
             if (ifEOF1) {
                 ifEOF2 = unit.fromFile(source2);
                 while(!ifEOF2) {
-                    if (unit.type == '0') std::cout << unit.type << "." << unit.id << " " << ifEOF2 << " " << std::ftell(source2) << std::endl;
                     if (save1_if_no2) {
                         unit.toFile(target);
                         savedAmount++;
