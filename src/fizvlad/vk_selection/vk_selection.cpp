@@ -385,6 +385,7 @@ namespace fizvlad {namespace vk_selection {
 
     std::ostream &operator<<(std::ostream &os, const Selection &selection) {
         os << "Inverted: " << (selection.isInverted() ? "true" : "false") << ". " << "Size: " << selection.size() << ".";
+        return os;
     }
 
 
