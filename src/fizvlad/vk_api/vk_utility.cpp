@@ -4,7 +4,7 @@
 namespace {
 
     // URL encode/decode
-    std::string str_encode (std::string str) {
+    std::string str_encode(std::string str) {
         std::string result;
         CURL *curl = curl_easy_init();
         if(curl) {
@@ -21,7 +21,7 @@ namespace {
         curl_easy_cleanup(curl);
         return result;
     }
-    std::string str_decode (std::string str) {
+    std::string str_decode(std::string str) {
         std::string result;
         CURL *curl = curl_easy_init();
         if(curl) {
@@ -42,7 +42,7 @@ namespace {
 
 
     // Requests
-    size_t writeFunction_ (char *recievedData, size_t size, size_t nmemb, std::string *buffer) {
+    size_t writeFunction_(char *recievedData, size_t size, size_t nmemb, std::string *buffer) {
         size_t result = 0;
         if (buffer != nullptr) {
             buffer->append(recievedData, size * nmemb);
@@ -50,7 +50,7 @@ namespace {
         }
         return result;
     }
-    std::string safeRequest_ (std::string url) {
+    std::string safeRequest_(std::string url) {
         CURL *curl; // curl object
         curl = curl_easy_init();
         if (!curl) {
@@ -69,12 +69,54 @@ namespace {
         curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL); // Use SSL
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &outputBuffer); // Buffer for callback function
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFunction_); // Callback
+
         // Ready to go
         CURLcode result = curl_easy_perform(curl);
         if (result != CURLE_OK) {
-            throw std::runtime_error(errorBuffer.c_str());
+            throw std::runtime_error("Request error: " + errorBuffer);
         }
         curl_easy_cleanup(curl);
+        return outputBuffer;
+    }
+
+
+    // Uploading file
+    std::string uploadDoc_(std::string server, std::string fieldName, std::string filePath) {
+        CURL *curl; // curl object
+        curl = curl_easy_init();
+        if (!curl) {
+            throw std::runtime_error("Failed to create curl object");
+        }
+        // Created curl
+
+        std::string errorBuffer;
+        std::string outputBuffer;
+
+        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errorBuffer);
+        curl_easy_setopt(curl, CURLOPT_URL, server.c_str());
+        curl_easy_setopt(curl, CURLOPT_HEADER, 0); // Don't show header
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1); // Do redirect
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 0); // Don't hide body
+        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL); // Use SSL
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &outputBuffer); // Buffer for callback function
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFunction_); // Callback
+
+        // Setting up MIME
+        curl_mime *mime = curl_mime_init(curl);
+        curl_mimepart *mimepart = curl_mime_addpart(mime);
+        curl_mime_name(mimepart, fieldName.c_str());
+        curl_mime_filedata(mimepart, filePath.c_str());
+
+        // Adding MIME to request
+        curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+
+        // Ready to go
+        CURLcode result = curl_easy_perform(curl);
+        if (result != CURLE_OK) {
+            throw std::runtime_error("Request error: " + errorBuffer);
+        }
+        curl_easy_cleanup(curl);
+        curl_mime_free(mime);
         return outputBuffer;
     }
 
@@ -134,6 +176,23 @@ namespace fizvlad {namespace vk_api {
     nlohmann::json execute(JScode code, Token token, Version version) {
         Parameters parameters = {{"code", code}};
         return apiRequest("execute", parameters, token, version);
+    }
+
+
+    std::string uploadDoc(std::string server, std::string filePath, std::string title, std::string token) {
+        std::string responseString = uploadDoc_(server, "file", filePath);
+        nlohmann::json uploadResponse;
+        std::string fileStr;
+        try {
+            uploadResponse = nlohmann::json::parse(responseString);
+            fileStr = uploadResponse["file"];
+        } catch (...) {
+            throw std::runtime_error("Unable to parse response into JSON.\nResponse: " + uploadResponse.dump());
+        }
+
+        nlohmann::json response = apiRequest("docs.save", {{"file", fileStr}, {"title", title}}, token)[0];
+        std::string result = "doc" + std::to_string((long) response["owner_id"]) + "_" + std::to_string((long) response["id"]);
+        return result;
     }
 
 }}

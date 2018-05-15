@@ -84,6 +84,11 @@ namespace fizvlad {namespace vk_api {
     /// Please take a look at https://vk.com/dev/execute before use.
     nlohmann::json execute(JScode code, Token token, Version version = VERSION);
 
+
+    /// Uploads file to given server and returns attachment string: "doc<owner_id>_<id>".
+    /// Required to send files via VK.
+    std::string uploadDoc(std::string server, std::string filePath, std::string title, std::string token);
+
 }}
 
 #endif // VK_UTILITY_H_INCLUDED

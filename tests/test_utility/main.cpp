@@ -20,7 +20,13 @@ int main() {
     cout << "Parameters test: " << to_string(p) << endl << endl;
 
 
-    json members = apiRequest("groups.getMembers", {{"group_id","157926798"}}, token);
-    cout << "apiRequest test #1: " << endl << members.dump() << endl << endl;
+    string server = apiRequest("docs.getMessagesUploadServer", {{"peer_id", "157230821"}}, token)["upload_url"];
+    cout << "Server for file posting: " << endl << server << endl << endl;
+
+    string attachment = uploadDoc(server, "LICENSE", "testTitle", token);
+    cout << "Attachment: " << attachment << endl;
+
+    apiRequest("messages.send", {{"user_id", "157230821"}, {"attachment", attachment}}, token);
+    cout << "Sent message" << endl;
     return 0;
 }
