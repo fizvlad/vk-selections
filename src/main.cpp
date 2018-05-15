@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <exception>
 #include <fstream>
 
@@ -56,7 +57,10 @@ int main() {
             string request = m.text.substr(6);
             try {
                 float result = calculator.query(request);
-                bot.sendMessage(m.sender, std::to_string(result));
+                // Using stringstream for beautified output
+                stringstream temp;
+                temp << result;
+                bot.sendMessage(m.sender, temp.str());
             } catch(exception e) {
                 bot.sendMessage(m.sender, "Ой! :0\n Случилась ошибка. Попробуйте ещё раз");
                 std::cerr << "ERROR: request: " << request << endl << e.what() << endl;
