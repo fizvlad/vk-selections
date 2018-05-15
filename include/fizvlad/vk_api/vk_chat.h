@@ -100,7 +100,11 @@ namespace chat {
 
 
         /// Send message to user.
-        void sendMessage(UnitId receiver, std::string text);
+        void sendMessage(UnitId receiver, std::string text, std::string attachment = "");
+
+
+        /// Sends file to user.
+        void uploadAndSend(UnitId receiver, std::string filePath, std::string fileTitle, std::string text = "");
 
 
     private:

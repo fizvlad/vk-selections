@@ -37,11 +37,30 @@ namespace chat {
     }
 
 
-    void ChatBot::sendMessage(UnitId receiver, std::string text) {
+    void ChatBot::sendMessage(UnitId receiver, std::string text, std::string attachment) {
         Parameters parameters = {
             {"user_id", std::to_string(receiver)},
             {"message", text}
         };
+        if (attachment != "") {
+            parameters.insert({"attachment", attachment});
+        }
+        apiRequest("messages.send", parameters, token_);
+    }
+
+
+    void ChatBot::uploadAndSend(UnitId receiver, std::string filePath, std::string fileTitle, std::string text) {
+        std::string server = apiRequest("docs.getMessagesUploadServer", {{"peer_id", std::to_string(receiver)}}, token_)["upload_url"];
+        std::string attachment = uploadDoc(server, filePath, fileTitle, token_);
+
+        Parameters parameters = {
+            {"user_id", std::to_string(receiver)},
+            {"attachment", attachment}
+        };
+        if (text != "") {
+            parameters.insert({"message", text});
+        }
+
         apiRequest("messages.send", parameters, token_);
     }
 

@@ -44,11 +44,13 @@ int main() {
             return true;
         }
 
+
         if (m.text.find("!selection ") != string::npos) {
             string request = m.text.substr(11);
             bot.sendMessage(m.sender, "Получен запрос: \n " + request + "\n К сожалению, я ещё на них не отвечаю (но скоро начну)");
             return true;
         }
+
 
         if (m.text.find("!calc ") != string::npos) {
             string request = m.text.substr(6);
@@ -56,17 +58,18 @@ int main() {
                 float result = calculator.query(request);
                 bot.sendMessage(m.sender, std::to_string(result));
             } catch(exception e) {
-                bot.sendMessage(m.sender, "Ой! :0\n Случилась ошибка. Попробуй ещё раз");
+                bot.sendMessage(m.sender, "Ой! :0\n Случилась ошибка. Попробуйте ещё раз");
                 std::cerr << "ERROR: request: " << request << endl << e.what() << endl;
             }
 
             return true;
         }
 
+
         if (m.text == "!stop") {
 
             bot.setOnlineStatus(false);
-            return false;
+            return false; // Stop listening
         }
 
 
