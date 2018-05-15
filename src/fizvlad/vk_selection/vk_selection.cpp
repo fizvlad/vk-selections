@@ -422,7 +422,7 @@ namespace fizvlad {namespace vk_selection {
 
 
     Unit::Unit(UnitCustomId cid, vk_api::Token token) : type_(Undefined), id_(0), customId_(cid)  {
-        nlohmann::json re = vk_api::apiRequest("utils.resolveScreenName", {{"screen_name", cid}});
+        nlohmann::json re = vk_api::apiRequest("utils.resolveScreenName", {{"screen_name", cid}}, token);
         std::string type = re["type"];
         UnitId id = re["object_id"];
         if (type == "user") {
