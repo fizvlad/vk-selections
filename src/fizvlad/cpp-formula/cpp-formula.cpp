@@ -117,7 +117,6 @@ namespace fizvlad {
     }
 
     bool operator<(const Formula::Operand &l, const Formula::Operand &r) {
-        //TODO finish
         if (l.type == r.type) {
             return (l.type == Formula::String && l.str < r.str) || (l.type == Formula::Alias && l.aliasIndex < r.aliasIndex);
         } else {
