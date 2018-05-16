@@ -17,7 +17,9 @@ int main() {
 
 
     Parameters p = {{"a", "1"}, {"b", "2"}, {"sample text", "sample 2"}};
-    cout << "Parameters test: " << to_string(p) << endl << endl;
+    cout << "Parameters test: " << to_string(p) << endl;
+
+    cout << utility::xml_decode("XML encode test: amp:&amp; quot:&quot; unknown:&asfasf; ") << endl << endl;
 
 
     string server = apiRequest("docs.getMessagesUploadServer", {{"peer_id", "157230821"}}, token)["upload_url"];

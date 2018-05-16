@@ -82,6 +82,15 @@ namespace {
         return outputBuffer;
     }
 
+
+    // XML entitities
+    const std::vector< std::pair<std::string, char> > XML_entities = {
+        {"quot", '"'},
+        {"amp", '&'},
+        {"apos", '\''},
+        {"lt", '<'},
+        {"gt", '>'}
+    };
 }
 
 
@@ -122,6 +131,27 @@ namespace fizvlad {namespace vk_api {
                 throw std::runtime_error("Unable to decode string. Unable to init CURL.");
             }
             curl_easy_cleanup(curl);
+            return result;
+        }
+
+        std::string xml_decode(const std::string &str) {
+            std::string result = "";
+            for (size_t i = 0; i < str.size(); i++) {
+                bool ifReplaced = false;
+                if (str[i] == '&') {
+                    for (std::pair<std::string, char> entity : XML_entities) {
+                        if (str.substr(i + 1, entity.first.size()) == entity.first) {
+                            result += entity.second;
+                            ifReplaced = true;
+                            i += entity.first.size() + 1;
+                            break;
+                        }
+                    }
+                }
+                if (!ifReplaced) {
+                    result += str[i];
+                }
+            }
             return result;
         }
 
