@@ -10,6 +10,7 @@
 using namespace std;
 using nlohmann::json;
 using namespace fizvlad::vk_api::chat;
+using namespace fizvlad::vk_selection;
 using namespace fizvlad::selection_manager;
 
 int main() {
@@ -20,8 +21,15 @@ int main() {
     fin >> token;
     cout << "Token: " << token[0] << token[1] << token[2] << token[3] << "..." << endl << endl;
 
+    fstream fin2("private/serviceToken.txt");
+    string token2;
+    fin2 >> token2;
+    cout << "Token: " << token2[0] << token2[1] << token2[2] << token2[3] << "..." << endl << endl;
+
+    size_t maxToDisplay = 15;
 
     Calculator calculator;
+    Selector selector(token, token2);
 
 
     ChatBot bot(token, 157926798);
@@ -48,7 +56,29 @@ int main() {
 
         if (m.text.find("!selection ") != string::npos) {
             string request = m.text.substr(11);
-            bot.sendMessage(m.sender, "Получен запрос: \n " + request + "\n К сожалению, я ещё на них не отвечаю (но скоро начну)");
+            try {
+                bot.sendMessage(m.sender, "Запрос получен");
+                cout << "Selection request: " << request << endl;
+                Selection result = selector.query(request);
+                stringstream msg;
+                msg << "Выборка" << (result.isInverted() ? " " : " не ") << "инвертирована. Размер: " << result.size();
+                bot.sendMessage(m.sender, msg.str());
+                if (result.size() <= maxToDisplay) {
+                    string output = "";
+                    result.forEach([&output](UnitType type, UnitId id){
+                        output += unitTypeName(type) + " " + to_string(id) + "\n";
+                    });
+                    bot.sendMessage(m.sender, output);
+                } else {
+                    result.saveAs(to_string(m.sender));
+                    string filename = to_string(m.sender) + ".txt";
+                    bot.uploadAndSend(m.sender, filename, "Selection.txt");
+                    remove(filename.c_str());
+                }
+            } catch(exception e) {
+                bot.sendMessage(m.sender, "Ой! :0\n Случилась ошибка. Попробуйте ещё раз");
+                cerr << "ERROR: request: " << request << endl << "what: " << e.what() << endl;
+            }
             return true;
         }
 
@@ -63,7 +93,7 @@ int main() {
                 bot.sendMessage(m.sender, temp.str());
             } catch(exception e) {
                 bot.sendMessage(m.sender, "Ой! :0\n Случилась ошибка. Попробуйте ещё раз");
-                std::cerr << "ERROR: request: " << request << endl << e.what() << endl;
+                cerr << "ERROR: request: " << request << endl << e.what() << endl;
             }
 
             return true;

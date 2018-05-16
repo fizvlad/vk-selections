@@ -21,6 +21,30 @@ namespace fizvlad {namespace selection_manager {
         std::function<float(std::string)> converter;
         std::vector< std::function< float(std::vector<float>) > > handlers;
         Formula::Actions actions;
+
+    };
+
+
+
+    using Selection = fizvlad::vk_selection::Selection;
+
+    class Selector {
+    public:
+
+        Selection query(std::string request);
+
+        Selector(fizvlad::vk_api::Token groupToken, fizvlad::vk_api::Token serviceToken);
+
+
+    private:
+
+        std::function<Selection(std::string)> converter;
+        std::vector< std::function< Selection(std::vector<Selection>) > > handlers;
+        Formula::Actions actions;
+
+        fizvlad::vk_api::Token gtoken_;
+        fizvlad::vk_api::Token stoken_;
+
     };
 
 }}
