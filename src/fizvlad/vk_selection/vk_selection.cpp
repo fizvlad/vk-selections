@@ -352,8 +352,13 @@ namespace fizvlad {namespace vk_selection {
 
 
     void Selection::removeFile_() {
+        if (name_ == "") {
+            std::cerr << "Empty file name?!" << std::endl;
+            return;
+        }
         if (std::remove(name_.c_str()) != 0) {
-            std::cerr << "Error: Unable to remove " << name_ << " with size of ~ " << (size_ * 5 / 1000) << " MB" << std::endl;
+            std::cerr << "Error: Unable to remove " + name_ + " with size of ~ " + std::to_string((size_ * 5 / 1000)) + " MB. File doesn't exist!" << std::endl;
+            return;
         }
     }
 
