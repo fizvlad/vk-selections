@@ -79,7 +79,7 @@ namespace chat {
                     if ((unsigned)i[0] == (unsigned)longpoll::EVENTS::MESSAGE::NEW &&
                         !((unsigned)i[2] & (unsigned)longpoll::MESSAGE_FLAGS::OUTBOX)) {
                         // Received new message
-                        Message message(i[4], i[1], i[3], 0, i[5]);
+                        Message message(i[4], i[1], i[3], 0, utility::xml_decode(i[5]));
                         bool isOldMessage = false;
                         if (!handler(message, isOldMessage)) {
                             return false;

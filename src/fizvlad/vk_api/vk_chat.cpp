@@ -77,7 +77,7 @@ namespace chat {
             current += (size_t)response["current"];
             for (auto sub : response["items"]) {
                 for (auto m : sub) {
-                    result.push_back(Message(m["message"]));
+                    result.push_back(Message(utility::xml_decode(m["message"])));
                 }
             }
         }
