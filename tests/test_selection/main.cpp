@@ -32,12 +32,18 @@ int main() {
          << buerak << endl;
 
     // Works fine
+    Selection emptySelection;
+    emptySelection.saveAs("result_empty");
+
+    // Works fine
     Selection test = Filyus_Bot.friends(token2);
     test.saveAs("result_Not_Filyus_friends");
 
     // Works fine. Requires time
     Selection test2 = habr.members(token);
     test2.saveAs("result_Habrahabr_subscribers");
+
+
 
     // Works fine. Requires lot of time
     //Selection test3 = music.members(token);
