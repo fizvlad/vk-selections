@@ -3,44 +3,6 @@
 // Utility namespace. Unreachable from other files.
 namespace {
 
-    // URL encode/decode
-    std::string str_encode(std::string str) {
-        std::string result;
-        CURL *curl = curl_easy_init();
-        if(curl) {
-            char *output = curl_easy_escape(curl, str.c_str(), str.size());
-            if(output) {
-                result.append(output);
-                curl_free(output);
-            } else {
-                throw std::runtime_error("Unable to encode string. escape returned NULL.");
-            }
-        } else {
-            throw std::runtime_error("Unable to encode string. Unable to init CURL.");
-        }
-        curl_easy_cleanup(curl);
-        return result;
-    }
-    std::string str_decode(std::string str) {
-        std::string result;
-        CURL *curl = curl_easy_init();
-        if(curl) {
-            int l;
-            char *output = curl_easy_unescape(curl, str.c_str(), str.size(), &l);
-            if(output) {
-                result.append(output, l);
-                curl_free(output);
-            } else {
-                throw std::runtime_error("Unable to decode string. unescape returned NULL.");
-            }
-        } else {
-            throw std::runtime_error("Unable to decode string. Unable to init CURL.");
-        }
-        curl_easy_cleanup(curl);
-        return result;
-    }
-
-
     // Requests
     size_t writeFunction_(char *recievedData, size_t size, size_t nmemb, std::string *buffer) {
         size_t result = 0;
@@ -125,11 +87,52 @@ namespace {
 
 namespace fizvlad {namespace vk_api {
 
+    namespace utility {
+
+        std::string url_encode(const std::string &str) {
+            std::string result;
+            CURL *curl = curl_easy_init();
+            if(curl) {
+                char *output = curl_easy_escape(curl, str.c_str(), str.size());
+                if(output) {
+                    result.append(output);
+                    curl_free(output);
+                } else {
+                    throw std::runtime_error("Unable to encode string. escape returned NULL.");
+                }
+            } else {
+                throw std::runtime_error("Unable to encode string. Unable to init CURL.");
+            }
+            curl_easy_cleanup(curl);
+            return result;
+        }
+        std::string url_decode(const std::string &str) {
+            std::string result;
+            CURL *curl = curl_easy_init();
+            if(curl) {
+                int l;
+                char *output = curl_easy_unescape(curl, str.c_str(), str.size(), &l);
+                if(output) {
+                    result.append(output, l);
+                    curl_free(output);
+                } else {
+                    throw std::runtime_error("Unable to decode string. unescape returned NULL.");
+                }
+            } else {
+                throw std::runtime_error("Unable to decode string. Unable to init CURL.");
+            }
+            curl_easy_cleanup(curl);
+            return result;
+        }
+
+    }
+
+
     std::string to_string(Parameters parameters) {
         std::stringstream stream;
         stream << "?";
         for (Parameter p : parameters) {
-            stream << str_encode(p.first) << "=" << str_encode(p.second) << "&";
+            stream << utility::url_encode(p.first) << "=" << utility::url_encode(p.second) << "&";
         }
         std::string result = stream.str();
         if (result.size() != 0) {

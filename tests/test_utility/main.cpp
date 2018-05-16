@@ -23,7 +23,7 @@ int main() {
     string server = apiRequest("docs.getMessagesUploadServer", {{"peer_id", "157230821"}}, token)["upload_url"];
     cout << "Server for file posting: " << endl << server << endl << endl;
 
-    string attachment = uploadDoc(server, "LICENSE", "testTitle", token);
+    string attachment = uploadDoc(server, "test.txt", "testTitle", token);
     cout << "Attachment: " << attachment << endl;
 
     apiRequest("messages.send", {{"user_id", "157230821"}, {"attachment", attachment}}, token);

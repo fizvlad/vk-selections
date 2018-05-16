@@ -14,6 +14,13 @@
 
 namespace fizvlad {namespace vk_api {
 
+    namespace utility {
+        // URL encode/decode
+        std::string url_encode(const std::string &str);
+        std::string url_decode(const std::string &str);
+    }
+
+
     /// VK_API exception class.
     class ApiRequestExpetion : std::exception {
     public:
