@@ -8,7 +8,7 @@
 #include <unordered_map> // std::unordered_map
 #include <exception> // std::exception
 
-#include "curl.h" // curl
+#include "curl/curl.h" // curl
 #include "nlohmann/json.hpp" // json
 
 
