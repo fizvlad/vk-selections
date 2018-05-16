@@ -2,6 +2,7 @@
 #include <sstream>
 #include <exception>
 #include <fstream>
+#include <unordered_map>
 
 #include "fizvlad/vk_api/vk_chat.h"
 
@@ -16,24 +17,31 @@ using namespace fizvlad::selection_manager;
 int main() {
     setlocale(LC_CTYPE, "rus");
 
-    fstream fin("private/groupToken.txt");
-    string token;
-    fin >> token;
-    cout << "Token: " << token[0] << token[1] << token[2] << token[3] << "..." << endl << endl;
+    ifstream fin("bot.config");
+    unordered_map<string, string> config;
+    while(fin.peek() != EOF) {
+        string key, val;
+        fin >> key >> val;
+        config.insert({key, val});
+    }
+    cout << "Loaded config. Amount of parameters: " << config.size() << endl;
 
-    fstream fin2("private/serviceToken.txt");
-    string token2;
-    fin2 >> token2;
-    cout << "Token: " << token2[0] << token2[1] << token2[2] << token2[3] << "..." << endl << endl;
 
-    size_t maxToDisplay = 15;
+
 
     Calculator calculator;
-    Selector selector(token, token2);
+    Selector selector(config["group_token"], config["service_token"]);
 
 
-    ChatBot bot(token, 157926798);
-    bot.setOnlineStatus(true);
+    ChatBot bot(config["group_token"], stoul(config["group_id"]));
+    if (config["change_online"] == "1") {
+        bot.setOnlineStatus(true);
+    }
+
+
+
+
+    cout << "Starting bot" << endl;
     bot.start([&] (Message m, bool isOld) {
 
         cout << (isOld ? "(Old message) " : "") << m.sender << " send message to " << m.receiver << " with id " << m.id << " at " << m.ts << ". Content: " << endl << m.text << endl;
@@ -63,7 +71,7 @@ int main() {
                 stringstream msg;
                 msg << "Выборка" << (result.isInverted() ? " " : " не ") << "инвертирована. Размер: " << result.size();
                 bot.sendMessage(m.sender, msg.str());
-                if (result.size() <= maxToDisplay) {
+                if (result.size() <= stoul(config["max_units_to_display"])) {
                     string output = "";
                     result.forEach([&output](UnitType type, UnitId id){
                         output += unitTypeName(type) + " " + to_string(id) + "\n";
@@ -101,8 +109,13 @@ int main() {
 
 
         if (m.text == "!stop") {
-
-            bot.setOnlineStatus(false);
+            if (m.sender != stoul(config["master_id"])) {
+                bot.sendMessage(m.sender, "У тебя здесь нет власти");
+                return true;
+            }
+            if (config["change_online"] == "1") {
+                bot.setOnlineStatus(false);
+            }
             return false; // Stop listening
         }
 
