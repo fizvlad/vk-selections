@@ -58,15 +58,6 @@ namespace {
     bool operator>(const util_Unit &l, const util_Unit &r) {
         return !(l < r || l == r);
     }
-    bool operator!=(const util_Unit &l, const util_Unit &r) {
-        return !(l == r);
-    }
-    bool operator<=(const util_Unit &l, const util_Unit &r) {
-        return l < r || l == r;
-    }
-    bool operator>=(const util_Unit &l, const util_Unit &r) {
-        return l > r || l == r;
-    }
 
 
     // Notice: Files cursors must be in place.
@@ -169,12 +160,46 @@ namespace fizvlad {namespace vk_selection {
 
 
 
+    size_t Selection::tIndex_ = 0;
+
+
+    Selection::Selection() : isInverted_(false), size_(0), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
+        inFile_("wb", [this](std::FILE *file){
+            char c = isInverted_ ? '1' : '0';
+            std::fwrite(&c, sizeof(char), 1, file);
+            std::fwrite(&size_, sizeof(size_t), 1, file);
+        });
+    }
+
+
+    Selection::Selection(const Selection& other)  : isInverted_(other.isInverted_), size_(other.size_), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
+        inFiles2_(other, "rb", *this, "wb", [](std::FILE *source, std::FILE *target){
+            size_t B_SIZE = 256;
+            char buffer[B_SIZE];
+            size_t s = std::fread(buffer, sizeof(char), B_SIZE, source);
+            while (s) {
+                std::fwrite(buffer, sizeof(char), s, target);
+                s = std::fread(buffer, sizeof(char), B_SIZE, source);
+            }
+        });
+    }
+
+
+    Selection &Selection::operator=(const Selection& other) {
+        Selection temp(other);
+        swap(temp, *this);
+        return *this;
+    }
+
+
+    Selection::Selection(Selection &&other) {
+        swap(other, *this);
+    }
+
+
     Selection &Selection::operator=(Selection &&other) {
         swap(other, *this);
         return *this;
-    }
-    Selection::Selection(Selection &&other) {
-        swap(other, *this);
     }
 
 
@@ -324,38 +349,6 @@ namespace fizvlad {namespace vk_selection {
         });
 
         std::fclose(file);
-    }
-
-
-    size_t Selection::tIndex_ = 0;
-
-
-    Selection::Selection() : isInverted_(false), size_(0), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
-        inFile_("wb", [this](std::FILE *file){
-            char c = isInverted_ ? '1' : '0';
-            std::fwrite(&c, sizeof(char), 1, file);
-            std::fwrite(&size_, sizeof(size_t), 1, file);
-        });
-    }
-
-
-    Selection::Selection(const Selection& other)  : isInverted_(other.isInverted_), size_(other.size_), name_("selection_" + std::to_string(tIndex_++) + ".tmp." + FILE_EXTENSION) {
-        inFiles2_(other, "rb", *this, "wb", [](std::FILE *source, std::FILE *target){
-            size_t B_SIZE = 256;
-            char buffer[B_SIZE];
-            size_t s = std::fread(buffer, sizeof(char), B_SIZE, source);
-            while (s) {
-                std::fwrite(buffer, sizeof(char), s, target);
-                s = std::fread(buffer, sizeof(char), B_SIZE, source);
-            }
-        });
-    }
-
-
-    Selection &Selection::operator=(const Selection& other) {
-        Selection temp(other);
-        swap(temp, *this);
-        return *this;
     }
 
 

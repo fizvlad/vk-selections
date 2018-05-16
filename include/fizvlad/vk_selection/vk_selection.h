@@ -26,8 +26,13 @@ namespace fizvlad {namespace vk_selection {
     class Selection {
     public:
 
-        Selection&operator=(Selection &&other);
+        Selection();
+
+        Selection(const Selection& other);
+        Selection&operator=(const Selection& other);
+
         Selection(Selection &&other);
+        Selection&operator=(Selection &&other);
 
         ~Selection();
 
@@ -86,12 +91,6 @@ namespace fizvlad {namespace vk_selection {
         bool     isInverted_;
         size_t   size_;
         Filename name_;
-
-
-        Selection();
-
-        Selection(const Selection& other);
-        Selection&operator=(const Selection& other);
 
 
         void removeFile_();
