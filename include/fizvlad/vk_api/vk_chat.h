@@ -33,7 +33,7 @@ namespace chat {
         /// Parsing message info from response.
         Message(nlohmann::json response) :
             ts(response["date"]), id(response["id"]), sender((int)response["out"] == 1 ? 0 : (UnitId)response["user_id"]),
-            receiver((int)response["out"] == 0 ? 0 : (UnitId)response["user_id"]), text(response["body"].get<std::string>()) {}
+            receiver((int)response["out"] == 0 ? 0 : (UnitId)response["user_id"]), text(utility::xml_decode(response["body"].get<std::string>())) {}
 
     };
 
