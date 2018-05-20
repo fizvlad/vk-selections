@@ -157,6 +157,10 @@ namespace fizvlad {namespace vk_selection {
         return unitTypeNames[(int)type - (int)Undefined];
     }
 
+    std::string unitTypePrefix(UnitType type) {
+        return unitTypePrefixes[(int)type - (int)Undefined];
+    }
+
 
 
 

@@ -19,6 +19,9 @@ namespace fizvlad {namespace vk_selection {
     /// Unit types.
     const std::vector<std::string> unitTypeNames = {"Undefined", "User", "Public", "Group", "Event"};
     std::string unitTypeName(UnitType type);
+    /// Unit url prefixes.
+    const std::vector<std::string> unitTypePrefixes = {"", "id", "public", "club", "event"};
+    std::string unitTypePrefix(UnitType type);
 
 
     /// Class to work with selection of Units.
