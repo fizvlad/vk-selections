@@ -63,6 +63,9 @@ namespace {
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &outputBuffer); // Buffer for callback function
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFunction_); // Callback
 
+
+        #if CURL_AT_LEAST_VERSION(7,56,0)
+
         // Setting up MIME
         curl_mime *mime = curl_mime_init(curl);
         curl_mimepart *mimepart = curl_mime_addpart(mime);
@@ -74,11 +77,34 @@ namespace {
 
         // Ready to go
         CURLcode result = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+        curl_mime_free(mime);
+
+        #else // C_CURL_VERSION
+
+        // Borders of postlist
+        struct curl_httppost* beginPostList = NULL;
+        struct curl_httppost* endPostList = NULL;
+
+        curl_formadd(&beginPostList, &endPostList,
+                    CURLFORM_COPYNAME, fieldName.c_str(),
+                    CURLFORM_FILE, filePath.c_str(),
+                    CURLFORM_END);
+
+        // POST request
+        curl_easy_setopt(curl, CURLOPT_POST, true);
+        curl_easy_setopt(curl, CURLOPT_HTTPPOST, beginPostList);
+
+        // Ready to go
+        CURLcode result = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        #endif // C_CURL_VERSION
+
+
         if (result != CURLE_OK) {
             throw std::runtime_error("Request error: " + errorBuffer);
         }
-        curl_easy_cleanup(curl);
-        curl_mime_free(mime);
         return outputBuffer;
     }
 
