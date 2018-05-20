@@ -16,11 +16,9 @@ You will be able to launch bot with `./vk-selections` **after creating configura
 ## Configuring
 Bot configuration is stored in file `bot.config` in the same folder with following structure:
 
-<code>
-key1 value1<br>
-key2 value2<br>
-key3 value3
-</code>
+`key1 value1`  
+`key2 value2`  
+`key3 value3`
 
 Required configurations:
 * `group_token {TOKEN}` - token of main group used in most of requests
