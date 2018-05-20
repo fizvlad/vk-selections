@@ -5,7 +5,7 @@
 #
 # #############################################################################
 
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
 project(vk-selections CXX)
 
 
@@ -28,7 +28,7 @@ set(SRC_LIST "src/fizvlad/cpp-formula/cpp-formula.cpp"
 
 set(CURL_SSL_ENABLED ON)
 find_package(CURL REQUIRED)
-if((CURL_VERSION) AND (CURL_VERSION VERSION_LESS 7.56.0))
+if((NOT CURL_FOUND) OR (CURL_VERSION_STRING VERSION_LESS 7.56.0))
     message(FATAL_ERROR "CURL >= 7.56.0 required (${CURL_VERSION} found)")
 endif()
 include_directories("$CURL_INCLUDE_DIRS")

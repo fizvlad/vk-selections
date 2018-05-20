@@ -73,9 +73,19 @@ int main() {
                 bot.sendMessage(m.sender, msg.str());
                 if (result.size() <= stoul(config["max_units_to_display"]) && result.size() != 0) {
                     string output = "";
-                    result.forEach([&output](UnitType type, UnitId id){
-                        output += unitTypeName(type) + " " + to_string(id) + "\n";
-                    });
+                    if (config["display_mode"] == "0") {
+                        result.forEach([&output](UnitType type, UnitId id){
+                            output += to_string(id) + "\n";
+                        });
+                    } else if (config["display_mode"] == "1") {
+                        result.forEach([&output](UnitType type, UnitId id){
+                            output += "www.vk.com/" + unitTypePrefix(type) + to_string(id) + "\n";
+                        });
+                    } else if (config["display_mode"] == "2") {
+                        result.forEach([&output](UnitType type, UnitId id){
+                            output += "@" + unitTypePrefix(type) + to_string(id) + "\n";
+                        });
+                    }
                     bot.sendMessage(m.sender, output);
                 } else {
                     result.saveAs(to_string(m.sender));
