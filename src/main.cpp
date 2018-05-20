@@ -75,7 +75,7 @@ int main() {
                     string output = "";
                     if (config["display_mode"] == "0") {
                         result.forEach([&output](UnitType type, UnitId id){
-                            output += to_string(id) + "\n";
+                            output += unitTypeName(type) + " " + to_string(id) + "\n";
                         });
                     } else if (config["display_mode"] == "1") {
                         result.forEach([&output](UnitType type, UnitId id){
