@@ -71,7 +71,7 @@ int main() {
                 stringstream msg;
                 msg << "Выборка" << (result.isInverted() ? " " : " не ") << "инвертирована. Размер: " << result.size();
                 bot.sendMessage(m.sender, msg.str());
-                if (result.size() <= stoul(config["max_units_to_display"]) && result.size() != 0) {
+                if (result.size() <= stoul(config["max_units_to_display"])) {
                     string output = "";
                     if (config["display_mode"] == "0") {
                         result.forEach([&output](UnitType type, UnitId id){
