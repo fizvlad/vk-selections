@@ -28,9 +28,6 @@ set(SRC_LIST "src/fizvlad/cpp-formula/cpp-formula.cpp"
 
 set(CURL_SSL_ENABLED ON)
 find_package(CURL REQUIRED)
-if((NOT CURL_FOUND) OR (CURL_VERSION_STRING VERSION_LESS 7.56.0))
-    message(FATAL_ERROR "CURL >= 7.56.0 required (${CURL_VERSION} found)")
-endif()
 include_directories("$CURL_INCLUDE_DIRS")
 
 
