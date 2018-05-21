@@ -79,7 +79,7 @@ namespace fizvlad {namespace selection_manager{
 
                 vk_selection::Unit unit(id, gtoken_);
                 if (unit.type() == vk_selection::Undefined) {
-                    throw std::runtime_error("Undefined unit");
+                    throw vk_api::ApiRequestException("Undefined unit");
                 }
 
 
@@ -98,7 +98,7 @@ namespace fizvlad {namespace selection_manager{
                 }
                 /*if (method == "subscribers") {
                 }*/
-                throw std::runtime_error("Unsupported unit method");
+                throw vk_api::ApiRequestException("Unsupported unit method");
             };
         }
 

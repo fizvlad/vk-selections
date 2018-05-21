@@ -35,7 +35,7 @@ namespace longpoll {
 
         nlohmann::json response = jsonRequest(url, parameters);
         if (response.find("failed") != response.end()) {
-            throw ApiRequestExpetion("Longpoll request error. Response: " + response.dump());
+            throw ApiRequestException("Longpoll request error. Response: " + response.dump());
         }
 
         ts_ = response["ts"];

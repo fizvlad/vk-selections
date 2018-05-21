@@ -30,7 +30,7 @@ namespace {
         /// Returnes whether have read correctly.
         bool fromFile(std::FILE *file, bool pickOnly = false) {
             if (std::feof(file) != 0) {
-                throw std::runtime_error("End of file have already been reached");
+                throw fizvlad::vk_api::ApiRequestException("End of file have already been reached");
             }
 
             std::fread(&type, sizeof(char), 1, file);
@@ -431,7 +431,7 @@ namespace fizvlad {namespace vk_selection {
         } else if (type == "group") {
             initGroup_(id, token);
         } else if (type == "application") {
-            throw std::runtime_error("Custom id " + cid + " belongs to application");
+            throw vk_api::ApiRequestException("Custom id " + cid + " belongs to application");
         }
     }
 
@@ -453,7 +453,7 @@ namespace fizvlad {namespace vk_selection {
 
     Selection Unit::friends(vk_api::Token token) const {
         if (type_ != User) {
-            throw std::runtime_error("Can not request friends for this Unit.");
+            throw vk_api::ApiRequestException("Can not request friends for this Unit.");
         }
 
         vk_api::Parameters parameters = {
@@ -484,7 +484,7 @@ namespace fizvlad {namespace vk_selection {
 
     Selection Unit::members(vk_api::Token token) const {
         if (type_ != Public && type_ != Group && type_ != Event) {
-            throw std::runtime_error("Can not request members for this Unit.");
+            throw vk_api::ApiRequestException("Can not request members for this Unit.");
         }
 
         size_t total = 1;
@@ -559,7 +559,7 @@ namespace fizvlad {namespace vk_selection {
         } else if (st == "event") {
             type_ = Event;
         } else {
-            throw vk_api::ApiRequestExpetion("Unknown unit type: " + st);
+            throw vk_api::ApiRequestException("Unknown unit type: " + st);
         }
         id_ = groupInfo["id"];
         customId_ = groupInfo["screen_name"];

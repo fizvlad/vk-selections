@@ -23,11 +23,11 @@ namespace fizvlad {namespace vk_api {
 
 
     /// VK_API exception class.
-    class ApiRequestExpetion : std::exception {
+    class ApiRequestException : std::exception {
     public:
 
-        explicit ApiRequestExpetion(const char* message) : what_(message) {}
-        explicit ApiRequestExpetion(const std::string message) : what_(message) {}
+        explicit ApiRequestException(const char* message) : what_(message) {}
+        explicit ApiRequestException(const std::string message) : what_(message) {}
 
         const char* what() const noexcept {
             return what_.c_str();

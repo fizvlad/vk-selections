@@ -16,7 +16,7 @@ namespace {
         CURL *curl; // curl object
         curl = curl_easy_init();
         if (!curl) {
-            throw std::runtime_error("Failed to create curl object");
+            throw fizvlad::vk_api::ApiRequestException("Failed to create curl object");
         }
         // Created curl
 
@@ -35,7 +35,7 @@ namespace {
         // Ready to go
         CURLcode result = curl_easy_perform(curl);
         if (result != CURLE_OK) {
-            throw std::runtime_error("Request error: " + errorBuffer);
+            throw fizvlad::vk_api::ApiRequestException("Request error: " + errorBuffer);
         }
         curl_easy_cleanup(curl);
         return outputBuffer;
@@ -47,7 +47,7 @@ namespace {
         CURL *curl; // curl object
         curl = curl_easy_init();
         if (!curl) {
-            throw std::runtime_error("Failed to create curl object");
+            throw fizvlad::vk_api::ApiRequestException("Failed to create curl object");
         }
         // Created curl
 
@@ -103,7 +103,7 @@ namespace {
 
 
         if (result != CURLE_OK) {
-            throw std::runtime_error("Request error: " + errorBuffer);
+            throw fizvlad::vk_api::ApiRequestException("Request error: " + errorBuffer);
         }
         return outputBuffer;
     }
@@ -133,10 +133,10 @@ namespace fizvlad {namespace vk_api {
                     result.append(output);
                     curl_free(output);
                 } else {
-                    throw std::runtime_error("Unable to encode string. escape returned NULL.");
+                    throw ApiRequestException("Unable to encode string. escape returned NULL.");
                 }
             } else {
-                throw std::runtime_error("Unable to encode string. Unable to init CURL.");
+                throw ApiRequestException("Unable to encode string. Unable to init CURL.");
             }
             curl_easy_cleanup(curl);
             return result;
@@ -151,10 +151,10 @@ namespace fizvlad {namespace vk_api {
                     result.append(output, l);
                     curl_free(output);
                 } else {
-                    throw std::runtime_error("Unable to decode string. unescape returned NULL.");
+                    throw ApiRequestException("Unable to decode string. unescape returned NULL.");
                 }
             } else {
-                throw std::runtime_error("Unable to decode string. Unable to init CURL.");
+                throw ApiRequestException("Unable to decode string. Unable to init CURL.");
             }
             curl_easy_cleanup(curl);
             return result;
@@ -205,7 +205,7 @@ namespace fizvlad {namespace vk_api {
         try {
             response = nlohmann::json::parse(responseString);
         } catch (...) {
-            throw std::runtime_error("Unable to parse response into JSON. Request URL: " + url + to_string(parameters) + "\nResponse: " + response.dump());
+            throw ApiRequestException("Unable to parse response into JSON. Request URL: " + url + to_string(parameters) + "\nResponse: " + response.dump());
         }
         return response;
     }
@@ -227,7 +227,7 @@ namespace fizvlad {namespace vk_api {
             std::cerr << "Error occured: \n" << e.dump() << std::endl;
             return e;
         } else {
-            throw std::runtime_error("Unable to find re[\"response\"] or re[\"error\"]. \nResponse: " + response.dump());
+            throw ApiRequestException("Unable to find re[\"response\"] or re[\"error\"]. \nResponse: " + response.dump());
         }
     }
 
@@ -246,7 +246,7 @@ namespace fizvlad {namespace vk_api {
             uploadResponse = nlohmann::json::parse(responseString);
             fileStr = uploadResponse["file"];
         } catch (...) {
-            throw std::runtime_error("Unable to parse response into JSON.\nResponse: " + uploadResponse.dump());
+            throw ApiRequestException("Unable to parse response into JSON.\nResponse: " + uploadResponse.dump());
         }
 
         nlohmann::json response = apiRequest("docs.save", {{"file", fileStr}, {"title", title}}, token)[0];
