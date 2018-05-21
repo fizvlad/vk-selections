@@ -28,3 +28,9 @@ Required configurations:
 * `max_units_to_display INT` - amount of units to display in dialogue
 * `display_mode 0|1|2` - how to display ids in dialougue (*0* - type and id, *1* - url, *2* - summon-like `@{TYPE_PREFIX}{ID}`)
 * `change_online 0|1` - whether change bot online status on start and end of bot work
+
+
+## Usage
+You can request selections in group dialogue with following command:
+
+`!selection id123.friends && club456.members || (!customUserId.friends || anyId.auto)`
