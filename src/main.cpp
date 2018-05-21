@@ -29,6 +29,7 @@ int main() {
 
 
 
+try {
     Calculator calculator;
     Selector selector(config["group_token"], config["service_token"]);
 
@@ -134,6 +135,9 @@ int main() {
         return true;
 
     });
+} catch (fizvlad::vk_api::ApiRequestException e) {
+    cerr << "ERROR: " << e.what() << endl;
+}
 
     return 0;
 }
