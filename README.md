@@ -33,4 +33,4 @@ Required configurations:
 ## Usage
 You can request selections in group dialogue with following command:
 
-`!selection id123.friends && club456.members || (!customUserId.friends || anyId.auto)`
+`!selection id123.friends && club456.members || (!anyId1 || anyId2)`
