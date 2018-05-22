@@ -83,7 +83,7 @@ namespace fizvlad {namespace selection_manager{
                 }
 
 
-                if (method == "auto") {
+                if (pointPos == str.npos) {
                     if (unit.type() == vk_selection::User) {
                         return unit.friends(stoken_);
                     } else {
