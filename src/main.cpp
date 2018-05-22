@@ -94,9 +94,12 @@ try {
                     bot.uploadAndSend(m.sender, filename, "Selection.txt");
                     remove(filename.c_str());
                 }
-            } catch(fizvlad::vk_api::ApiRequestException e) {
+            } catch (fizvlad::vk_api::ApiRequestException e) {
                 bot.sendMessage(m.sender, "Ой! :0\n Случилась ошибка. Попробуйте ещё раз");
-                cerr << "ERROR: request: " << request << endl << "what: " << e.what() << endl;
+                cerr << "  ERROR (API):   request: " << request << endl << "what: " << e.what() << endl;
+            } catch (exception e) {
+                bot.sendMessage(m.sender, "Ой! :0\n Случилась ошибка. Попробуйте ещё раз");
+                cerr << "  ERROR (OTHER): request: " << request << endl << "what: " << e.what() << endl;
             }
             return true;
         }
