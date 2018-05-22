@@ -56,7 +56,7 @@ try {
             string msg = "";
             msg = msg + "Список доступных комманд: \n " +
                     "!calc <ВЫРАЖЕНИЕ> - посчитать выражение \n" +
-                    "!selection <ЗАПРОС> - запрос выборки пользователей (Пример: \"!selection fizvlad_bot.members\") \n " +
+                    "!selection <ЗАПРОС> - запрос выборки пользователей (Пример: \"!selection id123.friends && club456.members || (!anyId1 || anyId2)\") \n " +
                     "!stop - остановить работу бота";
             bot.sendMessage(m.sender, msg);
             return true;
