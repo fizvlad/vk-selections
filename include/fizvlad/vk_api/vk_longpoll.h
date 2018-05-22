@@ -83,6 +83,14 @@ namespace longpoll {
     }
 
 
+    /// Longpoll error code
+    namespace ERROR_CODES {
+        const int UPDATE_TS = 1;
+        const int UPDATE_KEY = 2;
+        const int UPDATE_ALL = 3;
+    }
+
+
     /// Class for work with longpoll.
     class Session {
     public:
@@ -154,6 +162,7 @@ namespace longpoll {
 
     private:
 
+        Token   token_;
         Url     server_;
         Token   key_;
         time_t  ts_;
@@ -161,8 +170,8 @@ namespace longpoll {
         Timeout timeout_;
         Version version_;
 
-        /// Setting up access token. Necessary for requests.
-        void initialize_(Token token);
+        /// Setting up longpoll session and requesting server. Necessary for requests.
+        void initialize_();
 
         /// Single request for changes.
         Updates request_();

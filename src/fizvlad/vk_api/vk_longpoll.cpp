@@ -3,8 +3,8 @@
 namespace fizvlad {namespace vk_api {
 namespace longpoll {
 
-    Session::Session(Token token, Flag mode, Timeout timeout, Version version) : server_(""), key_(""), ts_(0), mode_(mode), timeout_(timeout), version_(version) {
-        initialize_(token);
+    Session::Session(Token token, Flag mode, Timeout timeout, Version version) : token_(token), server_(""), key_(""), ts_(0), mode_(mode), timeout_(timeout), version_(version) {
+        initialize_();
     }
 
 
@@ -12,9 +12,9 @@ namespace longpoll {
     }
 
 
-    void Session::initialize_(Token token) {
+    void Session::initialize_() {
         Parameters parameters = {{"need_pts", mode_ & MODE::GET_PTS ? "1" : "0"}, {"lp_version", version_}};
-        nlohmann::json response = apiRequest("messages.getLongPollServer", parameters, token);
+        nlohmann::json response = apiRequest("messages.getLongPollServer", parameters, token_);
         server_ = response["server"];
         key_    = response["key"];
         ts_     = response["ts"];
@@ -35,7 +35,20 @@ namespace longpoll {
 
         nlohmann::json response = jsonRequest(url, parameters);
         if (response.find("failed") != response.end()) {
-            throw ApiRequestException("Longpoll request error. Response: " + response.dump());
+            int errCode = response["failed"];
+            switch (errCode) {
+                case ERROR_CODES::UPDATE_TS:
+                    ts_ = response["ts"];
+                    return request_();
+                    break;
+                case ERROR_CODES::UPDATE_KEY:
+                case ERROR_CODES::UPDATE_ALL:
+                    initialize_();
+                    return request_();
+                    break;
+                default:
+                    throw ApiRequestException("Longpoll request error. Response: " + response.dump());
+            }
         }
 
         ts_ = response["ts"];
