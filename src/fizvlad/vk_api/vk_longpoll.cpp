@@ -40,7 +40,7 @@ namespace longpoll {
         }
         if (response.find("failed") != response.end()) {
             int errCode = response["failed"];
-            std::cerr << "Longpoll error": << errCode << std::endl;
+            std::cerr << "Longpoll error: " << errCode << std::endl;
             switch (errCode) {
                 case ERROR_CODES::UPDATE_TS:
                     ts_ = response["ts"];
