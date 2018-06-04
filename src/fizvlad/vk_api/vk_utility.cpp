@@ -181,6 +181,13 @@ namespace fizvlad {namespace vk_api {
             return result;
         }
 
+
+        std::string getCurrentLocalTime() {
+            std::stringstream result;
+            std::time_t t = std::time(nullptr);
+            result << std::put_time(std::localtime(&t), "%d-%m-%Y %H-%M-%S");
+            return result.str();
+        }
     }
 
 
@@ -224,7 +231,7 @@ namespace fizvlad {namespace vk_api {
             return response["response"];
         } else if (response.find("error") != response.end()) {
             nlohmann::json e = response["error"];
-            std::cerr << "Error occured: \n" << e.dump() << std::endl;
+            std::cerr << utility::getCurrentLocalTime << " - " << "Error occured: \n" << e.dump() << std::endl;
             return e;
         } else {
             throw ApiRequestException("Unable to find re[\"response\"] or re[\"error\"]. \nResponse: " + response.dump());

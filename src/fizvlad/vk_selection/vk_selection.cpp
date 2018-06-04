@@ -357,11 +357,11 @@ namespace fizvlad {namespace vk_selection {
 
     void Selection::removeFile_() {
         if (name_ == "") {
-            std::cerr << "Empty file name?!" << std::endl;
+            std::cerr << vk_api::utility::getCurrentLocalTime() << " - " << "Empty file name?!" << std::endl;
             return;
         }
         if (std::remove(name_.c_str()) != 0) {
-            std::cerr << "Error: Unable to remove " + name_ + " with size of ~ " + std::to_string((size_ * 5 / 1000)) + " MB. File doesn't exist!" << std::endl;
+            std::cerr << vk_api::utility::getCurrentLocalTime() << " - " << "Error: Unable to remove " + name_ + " with size of ~ " + std::to_string((size_ * 5 / 1000)) + " MB. File doesn't exist!" << std::endl;
             return;
         }
     }
@@ -495,7 +495,7 @@ namespace fizvlad {namespace vk_selection {
             // NOTICE Result of following command is array of arrays (due to API.execute restrictions)
             nlohmann::json response = vk_api::execute(js_groupMembers(id_, current), token);
             if (response["total"] == nullptr) {
-                std::cerr << "Unable to get members of private group with id " << id_ << ". Custom id: " << customId_ << std:: endl;
+                std::cerr << vk_api::utility::getCurrentLocalTime() << " - " << "Unable to get members of private group with id " << id_ << ". Custom id: " << customId_ << std:: endl;
                 break;
             }
             total = (size_t) response["total"];

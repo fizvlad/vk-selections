@@ -4,6 +4,7 @@
 #include <string> // std::string
 #include <sstream> // std::stringstream
 #include <iostream> // std::cerr
+#include <iomanip> // std::put_time
 #include <utility> // std::pair
 #include <unordered_map> // std::unordered_map
 #include <exception> // std::exception
@@ -19,6 +20,9 @@ namespace fizvlad {namespace vk_api {
         std::string url_decode(const std::string &str);
 
         std::string xml_decode(const std::string &str);
+
+
+        std::string getCurrentLocalTime();
     }
 
 
