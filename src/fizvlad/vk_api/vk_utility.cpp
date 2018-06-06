@@ -231,7 +231,7 @@ namespace fizvlad {namespace vk_api {
             return response["response"];
         } else if (response.find("error") != response.end()) {
             nlohmann::json e = response["error"];
-            std::cerr << utility::getCurrentLocalTime << " - " << "Error occured: \n" << e.dump() << std::endl;
+            std::cerr << utility::getCurrentLocalTime() << " - " << "Error occured: \n" << e.dump() << std::endl;
             return e;
         } else {
             throw ApiRequestException("Unable to find re[\"response\"] or re[\"error\"]. \nResponse: " + response.dump());

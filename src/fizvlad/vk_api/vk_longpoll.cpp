@@ -35,12 +35,12 @@ namespace longpoll {
 
         nlohmann::json response = jsonRequest(url, parameters);
         if (response == nullptr) {
-            std::cerr << utility::getCurrentLocalTime << " - " << "Longpoll server returned null" << std::endl;
+            std::cerr << utility::getCurrentLocalTime() << " - " << "Longpoll server returned null" << std::endl;
             return request_();
         }
         if (response.find("failed") != response.end()) {
             int errCode = response["failed"];
-            std::cerr << utility::getCurrentLocalTime << " - " << "Longpoll error: " << errCode << std::endl;
+            std::cerr << utility::getCurrentLocalTime() << " - " << "Longpoll error: " << errCode << std::endl;
             switch (errCode) {
                 case ERROR_CODES::UPDATE_TS:
                     ts_ = response["ts"];
